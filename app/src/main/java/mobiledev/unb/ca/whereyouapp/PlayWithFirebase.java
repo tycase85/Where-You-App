@@ -27,6 +27,7 @@ public class PlayWithFirebase extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+
         mAddValueTxt = (EditText) findViewById(R.id.txtAddToFirebase);
         mUpdateKeyTxt= (EditText) findViewById(R.id.txtUpdateKey);
         mUpdateValuebTxt = (EditText) findViewById(R.id.txtUpdateValue);

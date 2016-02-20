@@ -1,23 +1,41 @@
 package mobiledev.unb.ca.whereyouapp;
 
+import android.Manifest;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Looper;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
+import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class MapsActivity extends FragmentActivity
         implements OnMapReadyCallback,
@@ -28,6 +46,8 @@ public class MapsActivity extends FragmentActivity
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest locationRequest;
     private LocationListener locationListener;
+    private Location mLastLocation;
+    private String testOutput = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,10 +68,24 @@ public class MapsActivity extends FragmentActivity
 
     }
 
-    private void getCurrentLocation(){
-        locationRequest = LocationRequest.create();
-        locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+    @Override
+    public void onConnected(Bundle connectionHint) {
+        int permissionCheck = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION);
+        if(permissionCheck == PackageManager.PERMISSION_GRANTED) {
+            mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
+                    mGoogleApiClient);
+        }
+        if(mMap != null){
+            moveToCurrentLocation();
+        }
 
+    }
+
+    public void moveToCurrentLocation(){
+        LatLng current = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+        mMap.addMarker(new MarkerOptions().position(current).title("You"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(current, 15));
     }
 
     /**
@@ -66,28 +100,17 @@ public class MapsActivity extends FragmentActivity
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
 
     protected void onStart() {
         mGoogleApiClient.connect();
 
-        //LocationManager.get
         super.onStart();
     }
 
     protected void onStop() {
         mGoogleApiClient.disconnect();
         super.onStop();
-    }
-
-    @Override
-    public void onConnected(Bundle connectionHint) {
-        // We are now connected!
     }
 
     @Override
@@ -99,5 +122,4 @@ public class MapsActivity extends FragmentActivity
     public void onConnectionFailed(ConnectionResult result) {
         // We tried to connect but failed!
     }
-
 }

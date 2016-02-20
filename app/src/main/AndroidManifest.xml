@@ -20,13 +20,7 @@
         <activity
             android:name=".PlayWithFirebase"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:theme="@style/AppTheme.NoActionBar"></activity>
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -41,7 +35,17 @@
 
         <activity
             android:name=".MapsActivity"
-            android:label="@string/title_activity_maps">Map</activity>
+            android:label="@string/title_activity_maps">
+
+        </activity>
+        <activity android:name=".WebServiceTest">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+        </activity>
     </application>
 
 </manifest>

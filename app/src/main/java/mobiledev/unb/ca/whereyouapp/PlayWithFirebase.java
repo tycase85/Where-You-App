@@ -25,7 +25,7 @@ public class PlayWithFirebase extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play_with_firebase);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        //setSupportActionBar(toolbar);
 
 
         mAddValueTxt = (EditText) findViewById(R.id.txtAddToFirebase);

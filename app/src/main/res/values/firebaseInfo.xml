@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name='firebaseUrl'>yourUrlHere</string>
+    <string name='firebaseUrl'>https://glaring-inferno-5566.firebaseio.com/</string>
 </resources>

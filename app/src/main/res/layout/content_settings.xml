@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="mobiledev.unb.ca.whereyouapp.SettingsActivity"
+    tools:showIn="@layout/activity_settings"
+    android:orientation="vertical"
+    android:background="#f78383"
+    android:weightSum="1">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_weight="0.13"
+        android:weightSum="1">
+
+        <ImageButton
+            android:layout_width="111dp"
+            android:layout_height="65dp"
+            android:src="@drawable/map2"
+            android:id="@+id/mapTab"
+            android:clickable="true"
+            android:cropToPadding="false" />
+
+        <ImageButton
+            android:layout_width="111dp"
+            android:layout_height="65dp"
+            android:src="@drawable/friend"
+            android:id="@+id/friendTab"
+            android:adjustViewBounds="false"
+            android:baselineAlignBottom="false"
+            android:clickable="true"
+            android:cropToPadding="false" />
+
+        <ImageButton
+            android:layout_width="111dp"
+            android:layout_height="65dp"
+            android:src="@drawable/settings"
+            android:id="@+id/settingsTab"
+            android:clickable="true" />
+
+    </LinearLayout>
+</LinearLayout>

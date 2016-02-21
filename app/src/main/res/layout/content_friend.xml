@@ -10,17 +10,17 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="mobiledev.unb.ca.whereyouapp.FriendActivity"
-    tools:showIn="@layout/activity_friend"
     android:orientation="vertical"
     android:background="#f78383"
-    android:weightSum="1">
+    android:weightSum="1"
+    tools:showIn="@layout/activity_friend">
 
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_weight="0.13"
+            android:layout_weight="0.04"
             android:weightSum="1">
 
             <ImageButton
@@ -50,5 +50,65 @@
 
 
         </LinearLayout>
+
+    <Space
+        android:layout_width="wrap_content"
+        android:layout_height="40px" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_horizontal"
+        android:weightSum="1">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="John Smith"
+            android:id="@+id/friend1"
+            android:layout_weight="0.13"
+            android:drawableLeft="@drawable/contact"
+            android:drawablePadding="10dp"
+            android:height="10dp"
+            android:textAlignment="center"
+            android:textSize="50dp"
+            android:textColor="#000000"
+            android:clickable="true"
+            android:gravity="center_vertical"
+            android:maxLines = "5"
+            android:scrollbars = "vertical"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Jane Smith"
+            android:id="@+id/friend2"
+            android:layout_weight="0.13"
+            android:drawableLeft="@drawable/contact"
+            android:drawablePadding="10dp"
+            android:height="10dp"
+            android:textAlignment="center"
+            android:textSize="50dp"
+            android:textColor="#000000"
+            android:clickable="true"
+            android:gravity="center_vertical" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Jeff Smith"
+            android:id="@+id/friend3"
+            android:layout_weight="0.13"
+            android:drawableLeft="@drawable/contact"
+            android:drawablePadding="10dp"
+            android:height="10dp"
+            android:textAlignment="center"
+            android:textSize="50dp"
+            android:textColor="#000000"
+            android:clickable="true"
+            android:gravity="center_vertical" />
     </LinearLayout>
+
+</LinearLayout>
 

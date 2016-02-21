@@ -21,6 +21,13 @@
 
     </android.support.design.widget.AppBarLayout>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Friends"
+        android:layout_gravity="center"
+        android:id="@+id/toolbar_title" />
+
     <include layout="@layout/content_friend" />
 
     <android.support.design.widget.FloatingActionButton

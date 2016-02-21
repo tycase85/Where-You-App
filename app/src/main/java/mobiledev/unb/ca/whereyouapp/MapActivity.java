@@ -2,6 +2,7 @@ package mobiledev.unb.ca.whereyouapp;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -10,11 +11,15 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Looper;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
+
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -68,6 +73,7 @@ public class MapActivity extends FragmentActivity
 
     }
 
+
     @Override
     public void onConnected(Bundle connectionHint) {
         int permissionCheck = ContextCompat.checkSelfPermission(this,
@@ -76,6 +82,7 @@ public class MapActivity extends FragmentActivity
             mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
                     mGoogleApiClient);
         }
+
         if(mMap != null){
             moveToCurrentLocation();
         }
@@ -122,4 +129,6 @@ public class MapActivity extends FragmentActivity
     public void onConnectionFailed(ConnectionResult result) {
         // We tried to connect but failed!
     }
+
+
 }

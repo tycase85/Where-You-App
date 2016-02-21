@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="fs_client_id">
+        W2V5LOWAZPNOSKBSHW3WCHCNSYQC500FZEHDNNRXNQKRPAUX
+    </string>
+
+    <string name="fs_client_secret" >
+        WK4PLAYLMPTAUXTOTVEEUCTJ4IR41UMBSB4FSZH4JN5XVSJR
+    </string>
+
+</resources>

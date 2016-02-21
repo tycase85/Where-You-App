@@ -17,13 +17,10 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true" />
 
-    <TextView
+    <ListView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="New Textq"
-        android:id="@+id/tvQueryResult"
+        android:id="@+id/lvPlaces"
         android:layout_alignParentStart="true"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
         android:layout_below="@+id/qpButton" />
 </RelativeLayout>

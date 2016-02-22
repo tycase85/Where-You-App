@@ -15,15 +15,16 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Input text will be added to firebase"
+        android:text="Add Location to firebase"
         android:id="@+id/txtContent"
         android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:textSize="@dimen/abc_dialog_padding_material" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Input text will update matching firebase record"
+        android:text="Latitude"
         android:id="@+id/textView"
         android:layout_marginTop="65dp"
         android:layout_below="@+id/txtContent"
@@ -32,25 +33,58 @@
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/txtAddToFirebase"
+        android:id="@+id/txtLocationName"
+        android:text="Twenty Twenty"
         android:layout_below="@+id/txtContent"
-        android:layout_alignParentStart="true"
-        android:text="value" />
+        android:layout_alignStart="@+id/txtLatitude" />
 
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/txtUpdateKey"
-        android:layout_below="@+id/textView"
-        android:layout_alignParentStart="true"
-        android:text="key" />
+        android:id="@+id/txtLatitude"
+        android:text="45.954890"
+        android:layout_below="@+id/txtLocationName"
+        android:layout_toEndOf="@+id/textView2" />
 
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/txtUpdateValue"
-        android:layout_below="@+id/txtUpdateKey"
+        android:id="@+id/txtLongitude"
+        android:text="-66.644469"
+        android:layout_below="@+id/txtLatitude"
+        android:layout_alignStart="@+id/txtLatitude" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Location Name"
+        android:id="@+id/textView2"
+        android:layout_alignBottom="@+id/txtLocationName"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Longitude"
+        android:id="@+id/textView3"
+        android:layout_alignBottom="@+id/txtLongitude"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="People Count"
+        android:id="@+id/textView5"
+        android:layout_below="@+id/txtLongitude"
         android:layout_alignParentStart="true"
-        android:text="value" />
+        android:layout_marginTop="23dp" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/txtCount"
+        android:text="50"
+        android:layout_alignBottom="@+id/textView5"
+        android:layout_alignStart="@+id/txtLongitude" />
 
 </RelativeLayout>

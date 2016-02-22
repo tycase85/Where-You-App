@@ -8,20 +8,50 @@ import android.location.Location;
  */
 public class LocationData {
 
-    public String id;
-    public String name;
-    public double lat;
-    public double lng;
+    private String id;
+    private String name;
+    private double lat;
+    private double lng;
+    private long count;
 
-    public LocationData(String id, String name, double lat, double lng){
-        this.id = id;
+    public LocationData(String name, double lat, double lng, long peopleCount){
+        this.name = name;
+        this.lat = lat;
+        this.lng = lng;
+        this.count = peopleCount;
+    }
+
+    public LocationData(String name, double lat, double lng){
         this.name = name;
         this.lat = lat;
         this.lng = lng;
     }
 
     public String toString(){
-        return id + "\n" + name;
+        return name + "\n" + lat + "/n" + lng;
+    }
+
+    public String getName(){
+        return name;
+    }
+
+    public double getLat(){
+        return lat;
+    }
+    public double getLng(){
+        return lng;
+    }
+
+    public String getId(){
+        return id;
+    }
+
+    public long getCount(){
+        return count;
+    }
+
+    public void setId(String id){
+        this.id = id;
     }
 
 }

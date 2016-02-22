@@ -2,7 +2,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#f78383"
     android:weightSum="1">
 
     <Space
@@ -27,13 +26,6 @@
         android:layout_gravity="center_horizontal"
         android:layout_weight="0.17" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Map"
-        android:id="@+id/mapButt"
-        android:layout_gravity="center_horizontal" />
-
     <Space
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -43,15 +35,16 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="Map"
+        android:id="@+id/mapButt"
+        android:layout_gravity="center_horizontal" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="Friends"
         android:id="@+id/friendButt"
         android:layout_gravity="center_horizontal" />
-
-    <Space
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_weight="0.09" />
 
     <Button
         android:layout_width="wrap_content"
@@ -59,5 +52,25 @@
         android:text="Settings"
         android:id="@+id/settingsButt"
         android:layout_gravity="center_horizontal" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Firebase (Temporary)"
+        android:id="@+id/btnFireDemo"
+        android:layout_gravity="center_horizontal" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Places (Temporary)"
+        android:id="@+id/btnPlaces"
+        android:layout_gravity="center_horizontal" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_weight="0.09" />
 
 </LinearLayout>

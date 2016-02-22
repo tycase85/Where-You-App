@@ -11,8 +11,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Looper;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.provider.ContactsContract;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -20,7 +19,11 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-
+import com.firebase.client.ChildEventListener;
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
@@ -41,6 +44,8 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MapActivity extends FragmentActivity
         implements OnMapReadyCallback,
@@ -53,10 +58,14 @@ public class MapActivity extends FragmentActivity
     private LocationListener locationListener;
     private Location mLastLocation;
     private String testOutput = "";
+    private Firebase ref;
+    private ArrayList<LocationData> fbLocations;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        fbLocations = new ArrayList<LocationData>();
         setContentView(R.layout.activity_map);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -70,6 +79,11 @@ public class MapActivity extends FragmentActivity
                     .addApi(LocationServices.API)
                     .build();
         }
+
+        Firebase.setAndroidContext(this);
+        ref = new Firebase(getResources().getString(R.string.firebaseUrl) + "/locations");
+
+        setFirebaseListeners(ref);
 
     }
 
@@ -91,7 +105,7 @@ public class MapActivity extends FragmentActivity
 
     public void moveToCurrentLocation(){
         LatLng current = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-        mMap.addMarker(new MarkerOptions().position(current).title("You"));
+        mMap.addMarker(new MarkerOptions().position(current).title("You")).showInfoWindow();
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(current, 15));
     }
 
@@ -130,5 +144,42 @@ public class MapActivity extends FragmentActivity
         // We tried to connect but failed!
     }
 
+    private void setFirebaseListeners(Firebase ref){
+        ref.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot snapshot, String str) {
+                String name = (String) snapshot.child("name").getValue();
+                double lat = (double) snapshot.child("lat").getValue();
+                double lng = (double) snapshot.child("lng").getValue();
+                long count = (long) snapshot.child("count").getValue();
+
+                LocationData lc = new LocationData(name, lat, lng, count);
+                fbLocations.add(lc);
+                LatLng pos = new LatLng(lat, lng);
+                mMap.addMarker(new MarkerOptions().position(pos).title(name).snippet("People: " + count)).showInfoWindow();
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot snapshot) {
+                String title = (String) snapshot.child("title").getValue();
+                System.out.println("The blog post titled " + title + " has been deleted");
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot snapshot, String str){
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot snapshot, String str){
+
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+                System.out.println("The read failed: " + firebaseError.getMessage());
+            }
+        });
+    }
 
 }

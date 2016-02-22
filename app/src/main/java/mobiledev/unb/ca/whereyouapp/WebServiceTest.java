@@ -139,14 +139,13 @@ public class WebServiceTest extends AppCompatActivity {
 
                 for(int i = 0; i < locationsResults.length(); i++){
                     JSONObject location = locationsResults.getJSONObject(i);
-                    String id = location.getString(ID);
                     String name = location.getString("name");
                     JSONObject geo = location.getJSONObject("geometry");
                     location = geo.getJSONObject("location");
                     Double lat = location.getDouble("lat");
                     Double lng = location.getDouble("lng");
 
-                    arr.add(new LocationData(id, name, lat, lng));
+                    arr.add(new LocationData(name, lat, lng));
                 }
             } catch (JSONException e){
                 Log.i(TAG, e.toString());

@@ -23,6 +23,8 @@ public class MainActivity extends Activity {
         final Button button1 = (Button) findViewById(R.id.mapButt);
         final Button button2 = (Button) findViewById(R.id.friendButt);
         final Button button3 = (Button) findViewById(R.id.settingsButt);
+        final Button mFireBtn = (Button) findViewById(R.id.btnFireDemo);
+        final Button mPlacesBtn = (Button) findViewById(R.id.btnPlaces);
 
         button1.setOnClickListener
                 (new View.OnClickListener()
@@ -58,6 +60,28 @@ public class MainActivity extends Activity {
                         Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
                         startActivity(intent);
 
+                    }
+                });
+
+        mFireBtn.setOnClickListener
+                (new View.OnClickListener()
+                {
+                    @Override
+                    public void onClick(View v)
+                    {
+                        Intent intent = new Intent(MainActivity.this, PlayWithFirebase.class);
+                        startActivity(intent);
+                    }
+                });
+
+        mPlacesBtn.setOnClickListener
+                (new View.OnClickListener()
+                {
+                    @Override
+                    public void onClick(View v)
+                    {
+                        Intent intent = new Intent(MainActivity.this, WebServiceTest.class);
+                        startActivity(intent);
                     }
                 });
     }

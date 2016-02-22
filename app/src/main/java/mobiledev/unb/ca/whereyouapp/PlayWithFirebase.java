@@ -1,23 +1,25 @@
 package mobiledev.unb.ca.whereyouapp;
 
+import android.location.Location;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
 
 public class PlayWithFirebase extends AppCompatActivity {
 
-    EditText mAddValueTxt;
-    EditText mUpdateKeyTxt;
-    EditText mUpdateValuebTxt;
+    EditText mLocationNameTxt;
+    EditText mLatTxt;
+    EditText mLngTxt;
+    EditText mCountTxt;
     Firebase ref;
 
     @Override
@@ -28,9 +30,10 @@ public class PlayWithFirebase extends AppCompatActivity {
         //setSupportActionBar(toolbar);
 
 
-        mAddValueTxt = (EditText) findViewById(R.id.txtAddToFirebase);
-        mUpdateKeyTxt= (EditText) findViewById(R.id.txtUpdateKey);
-        mUpdateValuebTxt = (EditText) findViewById(R.id.txtUpdateValue);
+        mLocationNameTxt = (EditText) findViewById(R.id.txtLocationName);
+        mLatTxt = (EditText) findViewById(R.id.txtLatitude);
+        mLngTxt = (EditText) findViewById(R.id.txtLongitude);
+        mCountTxt = (EditText) findViewById(R.id.txtCount);
 
         Firebase.setAndroidContext(this);
         ref = new Firebase(getResources().getString(R.string.firebaseUrl) + "/locations");
@@ -42,7 +45,6 @@ public class PlayWithFirebase extends AppCompatActivity {
                 addAndUpdateFirebase();
             }
         });
-
 
     }
 
@@ -69,10 +71,30 @@ public class PlayWithFirebase extends AppCompatActivity {
     }
 
     private void addAndUpdateFirebase(){
-        String add = mAddValueTxt.getText().toString();
-        if((!add.equals("")) && (!add.equals("Value"))){
-            ref.push().setValue(add);
-        }
+        String name = mLocationNameTxt.getText().toString();
+        double a = getDouble(mLatTxt);
+        double b = getDouble(mLngTxt);
+        long c = getLong(mCountTxt);
+
+        LocationData ld = new LocationData(name, a, b, c);
+        ref.push().setValue(ld, new Firebase.CompletionListener() {
+            @Override
+            public void onComplete(FirebaseError firebaseError, Firebase firebase) {
+                if (firebaseError != null) {
+                    Toast.makeText(PlayWithFirebase.this, "Data could not be saved. " + firebaseError.getMessage(), Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(PlayWithFirebase.this, "Saved Location!. ", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+    }
+
+    private double getDouble(EditText text){
+        return Double.parseDouble(text.getText().toString());
+    }
+
+    private long getLong(EditText text){
+        return Long.parseLong(text.getText().toString());
     }
 
 }

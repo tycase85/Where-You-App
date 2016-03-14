@@ -83,7 +83,7 @@ public class PlayWithFirebase extends AppCompatActivity {
                 if (firebaseError != null) {
                     Toast.makeText(PlayWithFirebase.this, "Data could not be saved. " + firebaseError.getMessage(), Toast.LENGTH_LONG).show();
                 } else {
-                    Toast.makeText(PlayWithFirebase.this, "Saved Location!. ", Toast.LENGTH_LONG).show();
+                    Toast.makeText(PlayWithFirebase.this, "Save Successful", Toast.LENGTH_LONG).show();
                 }
             }
         });

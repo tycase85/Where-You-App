@@ -1,12 +1,12 @@
 package mobiledev.unb.ca.whereyouapp;
 
-import android.location.Location;
 
 /**
  * Created by brionon 16-02-20.
  * Contains data pertaining to locations found through google play
  */
 public class LocationData {
+
 
     private String id;
     private String name;
@@ -28,7 +28,7 @@ public class LocationData {
     }
 
     public String toString(){
-        return name + "\n" + lat + "/n" + lng;
+        return name + "\nLatitude: " + lat + "\nLongitude: " + lng;
     }
 
     public String getName(){

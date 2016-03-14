@@ -3,22 +3,61 @@ package mobiledev.unb.ca.whereyouapp;
 /**
  * Created by rcase on 13/02/16.
  */
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.SignInButton;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.plus.Plus;
 
-public class MainActivity extends Activity {
+
+public class MainActivity extends FragmentActivity {
+
+    GoogleApiClient mGoogleApiClient;
+    SignInButton mGoogleLoginButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
+
+        mGoogleLoginButton = (SignInButton) findViewById(R.id.sign_in_button);
+        mGoogleLoginButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mGoogleLoginClicked = true;
+                if (!mGoogleApiClient.isConnecting()) {
+                    if (mGoogleConnectionResult != null) {
+                        resolveSignInError();
+                    } else if (mGoogleApiClient.isConnected()) {
+                        getGoogleOAuthTokenAndLogin();
+                    } else {
+                    /* connect API now */
+                        Log.d(TAG, "Trying to connect to Google API");
+                        mGoogleApiClient.connect();
+                    }
+                }
+            }
+        });
+
+
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(Plus.API)
+                .addScope(Plus.SCOPE_PLUS_LOGIN)
+                .build();
 
         final Button button1 = (Button) findViewById(R.id.mapButt);
         final Button button2 = (Button) findViewById(R.id.friendButt);

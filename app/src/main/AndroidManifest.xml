@@ -18,6 +18,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:screenOrientation="portrait">
+        <service android:name=".GeofenceTransitionIntentService" />
+
 
         <activity
             android:name=".MainActivity"

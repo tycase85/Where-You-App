@@ -1,11 +1,16 @@
 package mobiledev.unb.ca.whereyouapp;
 
+import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
 
@@ -19,6 +24,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -30,22 +36,48 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
 import com.firebase.client.AuthData;
+import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * A login screen that offers login via email/password.
  */
-public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
+public class LoginActivity extends AppCompatActivity
+    implements GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener{
 
     private UserLoginTask mAuthTask = null;
+    private final static String TAG = "LOGIN -";
+    private AuthData mAuth;
+    private GoogleApiClient mGoogleApiClient;
+    private Location mLastLocation = null;
+    private UserData currentUser;
 
     // UI references.
     private AutoCompleteTextView mEmailView;
@@ -54,6 +86,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private View mLoginFormView;
 
     private Firebase ref;
+    private ArrayList<LocationData> mNearbyLocations;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,16 +100,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         mPasswordView = (EditText) findViewById(R.id.password);
 
-        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == R.id.login || id == EditorInfo.IME_NULL) {
-                    attemptLogin();
-                    return true;
-                }
-                return false;
-            }
-        });
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+        }
 
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
@@ -143,12 +173,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
     private boolean isEmailValid(String email) {
-        //TODO: Replace this with your own logic
         return email.contains("@");
     }
 
     private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
         return password.length() > 4;
     }
 
@@ -188,60 +216,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
     }
 
-    @Override
-    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        return new CursorLoader(this,
-                // Retrieve data rows for the device user's 'profile' contact.
-                Uri.withAppendedPath(ContactsContract.Profile.CONTENT_URI,
-                        ContactsContract.Contacts.Data.CONTENT_DIRECTORY), ProfileQuery.PROJECTION,
-
-                // Select only email addresses.
-                ContactsContract.Contacts.Data.MIMETYPE +
-                        " = ?", new String[]{ContactsContract.CommonDataKinds.Email
-                .CONTENT_ITEM_TYPE},
-
-                // Show primary email addresses first. Note that there won't be
-                // a primary email address if the user hasn't specified one.
-                ContactsContract.Contacts.Data.IS_PRIMARY + " DESC");
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-        List<String> emails = new ArrayList<>();
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            emails.add(cursor.getString(ProfileQuery.ADDRESS));
-            cursor.moveToNext();
-        }
-
-        addEmailsToAutoComplete(emails);
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> cursorLoader) {
-
-    }
-
-    private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
-        //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
-        ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(LoginActivity.this,
-                        android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
-
-        mEmailView.setAdapter(adapter);
-    }
-
-
-    private interface ProfileQuery {
-        String[] PROJECTION = {
-                ContactsContract.CommonDataKinds.Email.ADDRESS,
-                ContactsContract.CommonDataKinds.Email.IS_PRIMARY,
-        };
-
-        int ADDRESS = 0;
-        int IS_PRIMARY = 1;
-    }
-
     /**
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
@@ -250,6 +224,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         private final String mEmail;
         private final String mPassword;
+        private final boolean mLoginSuccess = false;
+        private AuthData mAuthData = null;
 
         UserLoginTask(String email, String password) {
             mEmail = email;
@@ -259,25 +235,16 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         @Override
         protected Boolean doInBackground(Void... params) {
             try {
-                firebaseLogin();
+                return firebaseLogin();
             } catch (Exception e) {
-                createFirebaseUser();
+                Log.e(TAG, e.getStackTrace().toString());
+                return false;
             }
-
-            return true;
         }
 
         @Override
         protected void onPostExecute(final Boolean success) {
             mAuthTask = null;
-            showProgress(false);
-
-            if (success) {
-                //finish();
-            } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
-            }
         }
 
         @Override
@@ -286,20 +253,37 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             showProgress(false);
         }
 
-        public void firebaseLogin(){
+        public boolean firebaseLogin(){
             ref.authWithPassword(mEmail, mPassword, new Firebase.AuthResultHandler() {
+
                 @Override
                 public void onAuthenticated(AuthData authData) {
-                    System.out.println("User ID: " + authData.getUid() + ", Provider: " + authData.getProvider());
+                    Log.i("AUTH'D", "User ID: " + authData.getUid() + ", Provider: " + authData.getProvider());
+                    mAuthData = authData;
+                    SharedPreferences.Editor edit = getSharedPreferences("prefs",0).edit();
+                    edit.putString("uid", authData.getUid());
+                    edit.putString("email", mEmail);
+                    edit.apply();
+                    HashMap<String, Double> values = new HashMap<String, Double>();
+                    values.put("lat", mLastLocation.getLatitude());
+                    values.put("lng", mLastLocation.getLongitude());
+                    ref.child("users/"+authData.getUid()).setValue(values);
+                    Log.i("FBLOG", "person saved");
+
+                    showProgress(false);
+                    startMainActivity();
                 }
 
                 @Override
                 public void onAuthenticationError(FirebaseError firebaseError) {
-                    if (firebaseError.getCode() == FirebaseError.EMAIL_TAKEN) {
+                    if (firebaseError.getCode() != FirebaseError.EMAIL_TAKEN) {
                         createFirebaseUser();
                     }
+                    Toast.makeText(LoginActivity.this, "Auth error " + firebaseError.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             });
+
+            return true;
         }
 
         public void createFirebaseUser(){
@@ -307,16 +291,173 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 @Override
                 public void onSuccess(Map<String, Object> result) {
                     System.out.println("Successfully created user account with uid: " + result.get("uid"));
+                    firebaseLogin();
                 }
 
                 @Override
                 public void onError(FirebaseError firebaseError) {
-                    // there was an error
+                    Log.e("FIREBASE", "error creating new user");
                 }
             });
         }
     }
 
+    public void startMainActivity(){
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+        this.finish();
+    }
+
+    @Override
+    public void onConnectionSuspended(int cause) {
+        // We are not connected anymore!
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult result) {
+        // We tried to connect but failed!
+    }
+
+    @Override
+    public void onConnected(Bundle connectionHint) {
+        int permissionCheck = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION);
+        if(permissionCheck == PackageManager.PERMISSION_GRANTED) {
+            mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
+                    mGoogleApiClient);
+            new GooglePlacesWrapper(mLastLocation.getLatitude(), mLastLocation.getLongitude()).execute();
+        }
+    }
+
+    protected void onStart() {
+        mGoogleApiClient.connect();
+        super.onStart();
+    }
+
+    protected void onStop() {
+        mGoogleApiClient.disconnect();
+        super.onStop();
+    }
+
+    public class GooglePlacesWrapper extends AsyncTask<Void, Void, ArrayList<String>> {
+
+        private final static String TAG = "PLACESTEST";
+        String mNearbySearchURL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?type=bar";
+        String mQueryJSON;
+
+        public GooglePlacesWrapper(double lat,double lng) {
+            mNearbySearchURL += "&location=" + Double.toString(lat) + ",";
+            mNearbySearchURL += Double.toString(lng);
+            mNearbySearchURL += "&radius=5000&key=" + getResources().getString(R.string.google_places_key);
+        }
+
+        @Override
+        protected ArrayList<String> doInBackground(Void... params) {
+            String data = "";
+            HttpURLConnection httpUrlConnection = null;
+            ArrayList<String> responses = new ArrayList<String>();
+            String temp = mNearbySearchURL;
+            InputStream in = null;
+            HttpURLConnection conn = null;
+
+            do {
+                try {
+                    conn = (HttpURLConnection) new URL(temp)
+                            .openConnection();
+
+                    in = new BufferedInputStream(
+                            conn.getInputStream());
+                    data = readStream(in);
+                    responses.add(data);
+                    JSONObject response = new JSONObject(data);
+                    temp = mNearbySearchURL += "&pagetoken=" + response.getString("next_page_token");
+                } catch (JSONException e){
+                    Log.i(TAG, e.toString());
+                    temp = "";
+                } catch (MalformedURLException exception) {
+                    Log.e(TAG, "MalformedURLException");
+                } catch (IOException exception) {
+                    Log.e(TAG, "IOException");
+                } finally {
+                    if (null != conn)
+                        conn.disconnect();
+                }
+            } while(data.contains("next_page_token"));
+
+            responses.add(data);
+
+            return responses;
+        }
+
+        private String readStream(InputStream in) {
+            BufferedReader reader = null;
+            StringBuilder data = new StringBuilder("");
+            try {
+                reader = new BufferedReader(new InputStreamReader(in));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    data.append(line);
+                }
+            } catch (IOException e) {
+                Log.e(TAG, "IOException");
+            } finally {
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            return data.toString();
+        }
+
+        private ArrayList<LocationData> parseToLocationObjects(String data){
+            ArrayList<LocationData> arr = new ArrayList<LocationData>();
+
+            try{
+                JSONObject response = new JSONObject(data);
+                JSONArray locationsResults = response.getJSONArray("results");
+
+                for(int i = 0; i < locationsResults.length(); i++){
+                    JSONObject results = locationsResults.getJSONObject(i);
+                    JSONObject geo = results.getJSONObject("geometry");
+                    JSONObject location = geo.getJSONObject("location");
+                    final String placeID = results.getString("place_id");
+                    final String name = results.getString("name");
+                    final Double lat = location.getDouble("lat");
+                    final Double lng = location.getDouble("lng");
+
+                    ref.child("/locations/" + placeID).addListenerForSingleValueEvent(new ValueEventListener() {
+
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if(dataSnapshot.getValue() == null){
+                                LocationData loc = new LocationData (name, lat, lng);
+                                ref.child("/locations/" + placeID).setValue(loc);
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(FirebaseError firebaseError) {
+                            Log.i(TAG, firebaseError.getDetails());
+                        }
+                    });
+                }
+            } catch (JSONException e){
+                Log.i(TAG, e.toString());
+            }
+
+            return arr;
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<String> responses){
+            for(String data : responses) {
+                mNearbyLocations = parseToLocationObjects(data);
+            }
+        }
+    }
 
 }
 

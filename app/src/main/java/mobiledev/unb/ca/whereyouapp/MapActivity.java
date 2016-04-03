@@ -15,6 +15,7 @@ import android.os.Looper;
 import android.provider.ContactsContract;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
@@ -24,13 +25,11 @@ import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
-import com.firebase.client.ValueEventListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -49,12 +48,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-
 import static mobiledev.unb.ca.whereyouapp.Constants.GEOFENCE_EXPIRATION_TIME;
-import static mobiledev.unb.ca.whereyouapp.Constants.YERBA_BUENA_ID;
-import static mobiledev.unb.ca.whereyouapp.Constants.YERBA_BUENA_LATITUDE;
-import static mobiledev.unb.ca.whereyouapp.Constants.YERBA_BUENA_LONGITUDE;
-import static mobiledev.unb.ca.whereyouapp.Constants.YERBA_BUENA_RADIUS_METERS;
 
 public class MapActivity extends FragmentActivity
         implements OnMapReadyCallback,
@@ -93,9 +87,6 @@ public class MapActivity extends FragmentActivity
                     .addApi(LocationServices.API)
                     .build();
         }
-
-
-
     }
 
 
@@ -109,11 +100,10 @@ public class MapActivity extends FragmentActivity
         }
 
         if(mMap != null){
-            //moveToCurrentLocation();
+            moveToCurrentLocation();
         }
-
     }
-/*
+
     public void moveToCurrentLocation(){
         LatLng current = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
         mMap.addMarker(new MarkerOptions().position(current).title("You")).showInfoWindow();
@@ -169,23 +159,12 @@ public class MapActivity extends FragmentActivity
                 LatLng pos = new LatLng(lat, lng);
                 mMap.addMarker(new MarkerOptions().position(pos).title(name).snippet("People: " + count)).showInfoWindow();
 
-                mMap.addCircle(new CircleOptions().radius(YERBA_BUENA_RADIUS_METERS).visible(true).fillColor(Color.RED).strokeWidth(12));
-                mYerbaBuenaGeofence = new SimpleGeofence(
-                        name,                // geofenceId.
-                        lat,
-                        lng,
-                        YERBA_BUENA_RADIUS_METERS,
-                        GEOFENCE_EXPIRATION_TIME,
-                        Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT
-                );
-
-
+                mMap.addCircle(new CircleOptions().center(pos).radius(100));
             }
 
             @Override
             public void onChildRemoved(DataSnapshot snapshot) {
-                String title = (String) snapshot.child("title").getValue();
-                System.out.println("The blog post titled " + title + " has been deleted");
+
             }
 
             @Override

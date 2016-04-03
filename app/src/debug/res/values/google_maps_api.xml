@@ -1,6 +1,5 @@
 <resources>
     <!--
-    TODO: Before you run your application, you need a Google Maps API key.
 
     To get one, follow this link, follow the directions and press "Create" at the end:
 
@@ -19,8 +18,12 @@
         AIzaSyC4XpqinORTp_m7oa6G2kkHo8yh3FL_0LI
     </string>
 
-    <string name="googe_places_key" >
+    <string name="google_places_key" >
         AIzaSyC_TQ_NRLl5v4cNFdxtV0oMuo068i-5ORU
+    </string>
+
+    <string name="oath_id">
+        624926452213-g06bhjv4breh5uth3gflc3a76imqie3g.apps.googleusercontent.com
     </string>
 
 </resources>

@@ -29,26 +29,17 @@ public class SimpleGeofence {
     private final double mLatitude;
     private final double mLongitude;
     private final float mRadius;
-    private long mExpirationDuration;
-    private int mTransitionType;
-
     /**
      * @param geofenceId The Geofence's request ID.
      * @param latitude Latitude of the Geofence's center in degrees.
      * @param longitude Longitude of the Geofence's center in degrees.
-     * @param radius Radius of the geofence circle in meters.
-     * @param expiration Geofence expiration duration.
-     * @param transition Type of Geofence transition.
      */
-    public SimpleGeofence(String geofenceId, double latitude, double longitude, float radius,
-                          long expiration, int transition) {
+    public SimpleGeofence(String geofenceId, double latitude, double longitude) {
         // Set the instance fields from the constructor.
         this.mId = geofenceId;
         this.mLatitude = latitude;
         this.mLongitude = longitude;
-        this.mRadius = radius;
-        this.mExpirationDuration = expiration;
-        this.mTransitionType = transition;
+        this.mRadius = Constants.GEOFENCE_RADIUS;
     }
 
     // Instance field getters.
@@ -64,12 +55,6 @@ public class SimpleGeofence {
     public float getRadius() {
         return mRadius;
     }
-    public long getExpirationDuration() {
-        return mExpirationDuration;
-    }
-    public int getTransitionType() {
-        return mTransitionType;
-    }
 
     /**
      * Creates a Location Services Geofence object from a SimpleGeofence.
@@ -79,9 +64,9 @@ public class SimpleGeofence {
         // Build a new Geofence object.
         return new Geofence.Builder()
                 .setRequestId(mId)
-                .setTransitionTypes(mTransitionType)
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
                 .setCircularRegion(mLatitude, mLongitude, mRadius)
-                .setExpirationDuration(mExpirationDuration)
+                .setExpirationDuration(Constants.GEOFENCE_EXPIRATION_TIME)
                 .build();
     }
 

@@ -16,10 +16,6 @@ package mobiledev.unb.ca.whereyouapp;
  * limitations under the License.
  */
 
-        import static mobiledev.unb.ca.whereyouapp.Constants.CONNECTION_TIME_OUT_MS;
-        import static mobiledev.unb.ca.whereyouapp.Constants.GEOFENCE_DATA_ITEM_PATH;
-        import static mobiledev.unb.ca.whereyouapp.Constants.GEOFENCE_DATA_ITEM_URI;
-        import static mobiledev.unb.ca.whereyouapp.Constants.KEY_GEOFENCE_ID;
         import static mobiledev.unb.ca.whereyouapp.Constants.TAG;
 
         import android.app.IntentService;
@@ -31,6 +27,10 @@ package mobiledev.unb.ca.whereyouapp;
         import android.util.Log;
         import android.widget.Toast;
 
+        import com.firebase.client.DataSnapshot;
+        import com.firebase.client.Firebase;
+        import com.firebase.client.FirebaseError;
+        import com.firebase.client.ValueEventListener;
         import com.google.android.gms.common.ConnectionResult;
         import com.google.android.gms.common.api.GoogleApiClient;
         import com.google.android.gms.location.Geofence;
@@ -43,8 +43,7 @@ package mobiledev.unb.ca.whereyouapp;
 /**
  * Listens for geofence transition changes.
  */
-public class GeofenceTransitionsIntentService extends IntentService
-        implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class GeofenceTransitionsIntentService extends IntentService {
 
     private GoogleApiClient mGoogleApiClient;
 
@@ -55,11 +54,6 @@ public class GeofenceTransitionsIntentService extends IntentService
     @Override
     public void onCreate() {
         super.onCreate();
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(Wearable.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
     }
 
     /**
@@ -69,44 +63,34 @@ public class GeofenceTransitionsIntentService extends IntentService
      */
     @Override
     protected void onHandleIntent(Intent intent) {
-        GeofencingEvent geoFenceEvent = GeofencingEvent.fromIntent(intent);
+        final GeofencingEvent geoFenceEvent = GeofencingEvent.fromIntent(intent);
+        String uid = intent.getExtras().getString("placeID");
+        final Firebase location = new Firebase(getResources().getString(R.string.firebaseUrl) + "/locations/" + uid);
+
         if (geoFenceEvent.hasError()) {
             int errorCode = geoFenceEvent.getErrorCode();
             Log.e(TAG, "Location Services error: " + errorCode);
         } else {
-
-            int transitionType = geoFenceEvent.getGeofenceTransition();
-            if (Geofence.GEOFENCE_TRANSITION_ENTER == transitionType) {
-                // Connect to the Google Api service in preparation for sending a DataItem.
-                mGoogleApiClient.blockingConnect(CONNECTION_TIME_OUT_MS, TimeUnit.MILLISECONDS);
-                // Get the geofence id triggered. Note that only one geofence can be triggered at a
-                // time in this example, but in some cases you might want to consider the full list
-                // of geofences triggered.
-                String triggeredGeoFenceId = geoFenceEvent.getTriggeringGeofences().get(0)
-                        .getRequestId();
-                // Create a DataItem with this geofence's id. The wearable can use this to create
-                // a notification.
-                final PutDataMapRequest putDataMapRequest =
-                        PutDataMapRequest.create(GEOFENCE_DATA_ITEM_PATH);
-                putDataMapRequest.getDataMap().putString(KEY_GEOFENCE_ID, triggeredGeoFenceId);
-                putDataMapRequest.setUrgent();
-                if (mGoogleApiClient.isConnected()) {
-                    Wearable.DataApi.putDataItem(
-                            mGoogleApiClient, putDataMapRequest.asPutDataRequest()).await();
-                } else {
-                    Log.e(TAG, "Failed to send data item: " + putDataMapRequest
-                            + " - Client disconnected from Google Play Services");
+            location.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot snapshot) {
+                    int count = (int) snapshot.child("count").getValue();
+                    int transitionType = geoFenceEvent.getGeofenceTransition();
+                    if (Geofence.GEOFENCE_TRANSITION_ENTER == transitionType) {
+                        showToast(GeofenceTransitionsIntentService.this, R.string.entering_geofence);
+                        location.child("count").setValue(count + 1);
+                    } else if (Geofence.GEOFENCE_TRANSITION_EXIT == transitionType) {
+                        showToast(GeofenceTransitionsIntentService.this, R.string.exiting_geofence);
+                        location.child("count").setValue(count - 1);
+                    }
                 }
-                Toast.makeText(this, getString(R.string.entering_geofence),
-                        Toast.LENGTH_SHORT).show();
-                mGoogleApiClient.disconnect();
-            } else if (Geofence.GEOFENCE_TRANSITION_EXIT == transitionType) {
-                // Delete the data item when leaving a geofence region.
-                mGoogleApiClient.blockingConnect(CONNECTION_TIME_OUT_MS, TimeUnit.MILLISECONDS);
-                Wearable.DataApi.deleteDataItems(mGoogleApiClient, GEOFENCE_DATA_ITEM_URI).await();
-                showToast(this, R.string.exiting_geofence);
-                mGoogleApiClient.disconnect();
-            }
+
+                @Override
+                public void onCancelled(FirebaseError firebaseError) {
+
+                }
+            });
+
         }
     }
 
@@ -121,18 +105,6 @@ public class GeofenceTransitionsIntentService extends IntentService
                 Toast.makeText(context, context.getString(resourceId), Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    @Override
-    public void onConnected(Bundle connectionHint) {
-    }
-
-    @Override
-    public void onConnectionSuspended(int cause) {
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult result) {
     }
 
 }

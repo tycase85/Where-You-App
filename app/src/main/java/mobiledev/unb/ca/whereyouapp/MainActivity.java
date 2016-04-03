@@ -6,11 +6,16 @@ package mobiledev.unb.ca.whereyouapp;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class MainActivity extends Activity {
@@ -20,11 +25,13 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         final Button button1 = (Button) findViewById(R.id.mapButt);
         final Button button2 = (Button) findViewById(R.id.friendButt);
         final Button button3 = (Button) findViewById(R.id.settingsButt);
         final Button mFireBtn = (Button) findViewById(R.id.btnFireDemo);
         final Button mPlacesBtn = (Button) findViewById(R.id.btnPlaces);
+
 
         button1.setOnClickListener
                 (new View.OnClickListener()
@@ -107,6 +114,7 @@ public class MainActivity extends Activity {
 
         return super.onOptionsItemSelected(item);
     }
+
 
 
 }

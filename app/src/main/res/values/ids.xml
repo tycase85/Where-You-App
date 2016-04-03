@@ -2,4 +2,5 @@
 <resources>
     <item name="fab" type="id" />
     <item name="toolbar" type="id" />
+    <item name="recyclerView" type="id" />
 </resources>

@@ -48,12 +48,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-
 import static mobiledev.unb.ca.whereyouapp.Constants.GEOFENCE_EXPIRATION_TIME;
-import static mobiledev.unb.ca.whereyouapp.Constants.YERBA_BUENA_ID;
-import static mobiledev.unb.ca.whereyouapp.Constants.YERBA_BUENA_LATITUDE;
-import static mobiledev.unb.ca.whereyouapp.Constants.YERBA_BUENA_LONGITUDE;
-import static mobiledev.unb.ca.whereyouapp.Constants.YERBA_BUENA_RADIUS_METERS;
 
 public class MapActivity extends FragmentActivity
         implements OnMapReadyCallback,
@@ -164,24 +159,12 @@ public class MapActivity extends FragmentActivity
                 LatLng pos = new LatLng(lat, lng);
                 mMap.addMarker(new MarkerOptions().position(pos).title(name).snippet("People: " + count)).showInfoWindow();
 
-                
-                mMap.addCircle(new CircleOptions().radius(YERBA_BUENA_RADIUS_METERS).visible(true).fillColor(Color.RED).strokeWidth(12));
-                mYerbaBuenaGeofence = new SimpleGeofence(
-                        name,                // geofenceId.
-                        lat,
-                        lng,
-                        YERBA_BUENA_RADIUS_METERS,
-                        GEOFENCE_EXPIRATION_TIME,
-                        Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT
-                );
-
-
+                mMap.addCircle(new CircleOptions().center(pos).radius(100));
             }
 
             @Override
             public void onChildRemoved(DataSnapshot snapshot) {
-                String title = (String) snapshot.child("title").getValue();
-                System.out.println("The blog post titled " + title + " has been deleted");
+
             }
 
             @Override

@@ -9,26 +9,24 @@ import com.google.android.gms.maps.model.LatLng;
  */
 public class UserData {
 
-    private Location location;
     private double lat;
     private double lng;
+    private String email;
 
     public UserData(){};
 
-    public UserData(Location location){
-        this.location = location;
-        lat = location.getLatitude();
-        lng = location.getLongitude();
+    public UserData(String email, double lat, double lng){
+        this.email = email;
+        this.lat = lat;
+        this.lng = lng;
     }
 
-    public void setLocation(Location location){this.location = location;}
-
-    public double getLat(){
-        return lat;
-    }
+    public double getLat(){ return lat; }
 
     public double getLng(){
         return lng;
     }
+
+    public String getEmail() {return email;}
 
 }

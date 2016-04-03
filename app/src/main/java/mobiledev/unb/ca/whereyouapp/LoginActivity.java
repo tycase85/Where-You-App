@@ -4,9 +4,11 @@ import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -48,18 +50,27 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.google.android.gms.location.Geofence;
 
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.Manifest.permission.PACKAGE_USAGE_STATS;
 import static android.Manifest.permission.READ_CONTACTS;
+import static mobiledev.unb.ca.whereyouapp.Constants.GEOFENCE_EXPIRATION_TIME;
 
 import com.firebase.client.AuthData;
+import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -68,6 +79,7 @@ import org.json.JSONObject;
 /**
  * A login screen that offers login via email/password.
  */
+
 public class LoginActivity extends AppCompatActivity
     implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener{
@@ -77,7 +89,7 @@ public class LoginActivity extends AppCompatActivity
     private AuthData mAuth;
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation = null;
-    private UserData currentUser;
+    private PendingIntent geoIntent;
 
     // UI references.
     private AutoCompleteTextView mEmailView;
@@ -92,6 +104,8 @@ public class LoginActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+//        geoIntent = new PendingIntent(this, GeofenceTransitionsIntentService.class);
+
 
         Firebase.setAndroidContext(this);
         ref = new Firebase(getResources().getString(R.string.firebaseUrl));
@@ -99,6 +113,8 @@ public class LoginActivity extends AppCompatActivity
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
 
         mPasswordView = (EditText) findViewById(R.id.password);
+
+
 
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -258,28 +274,31 @@ public class LoginActivity extends AppCompatActivity
 
                 @Override
                 public void onAuthenticated(AuthData authData) {
-                    Log.i("AUTH'D", "User ID: " + authData.getUid() + ", Provider: " + authData.getProvider());
+                    Log.i("AUTH", "User ID: " + authData.getUid() + ", Provider: " + authData.getProvider());
                     mAuthData = authData;
-                    SharedPreferences.Editor edit = getSharedPreferences("prefs",0).edit();
+                    SharedPreferences.Editor edit = getSharedPreferences("userInfo",0).edit();
                     edit.putString("uid", authData.getUid());
                     edit.putString("email", mEmail);
                     edit.apply();
-                    HashMap<String, Double> values = new HashMap<String, Double>();
-                    values.put("lat", mLastLocation.getLatitude());
-                    values.put("lng", mLastLocation.getLongitude());
-                    ref.child("users/"+authData.getUid()).setValue(values);
-                    Log.i("FBLOG", "person saved");
+                    Firebase user = ref.child("users/" + authData.getUid());
+                    user.child("email").setValue(mEmail);
+                    user.child("lat").setValue(55);
+                    user.child("lng").setValue(55);
+                    Log.i("FBLOG", "location saved");
 
                     showProgress(false);
                     startMainActivity();
+
+
                 }
 
                 @Override
                 public void onAuthenticationError(FirebaseError firebaseError) {
                     if (firebaseError.getCode() != FirebaseError.EMAIL_TAKEN) {
                         createFirebaseUser();
+                    } else {
+                        Toast.makeText(LoginActivity.this, "Auth error " + firebaseError.getMessage(), Toast.LENGTH_SHORT).show();
                     }
-                    Toast.makeText(LoginActivity.this, "Auth error " + firebaseError.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             });
 
@@ -292,6 +311,7 @@ public class LoginActivity extends AppCompatActivity
                 public void onSuccess(Map<String, Object> result) {
                     System.out.println("Successfully created user account with uid: " + result.get("uid"));
                     firebaseLogin();
+                    Toast.makeText(LoginActivity.this, "New account created successfully", Toast.LENGTH_SHORT);
                 }
 
                 @Override
@@ -456,8 +476,27 @@ public class LoginActivity extends AppCompatActivity
             for(String data : responses) {
                 mNearbyLocations = parseToLocationObjects(data);
             }
+
+            GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
+
+            for(LocationData location : mNearbyLocations){
+                builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
+                builder.addGeofence(
+                        new SimpleGeofence(
+                                location.getId(),
+                                location.getLat(),
+                                location.getLng()
+                        ).toGeofence()
+                );
+            }
+            if(checkCallingPermission(ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+                LocationServices.GeofencingApi.addGeofences(
+                        mGoogleApiClient,
+                        builder.build(),
+                        geoIntent
+                );
+            }
         }
     }
-
 }
 

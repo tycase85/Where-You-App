@@ -104,7 +104,8 @@ public class LoginActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-//        geoIntent = new PendingIntent(this, GeofenceTransitionsIntentService.class);
+        Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
+        geoIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
 
         Firebase.setAndroidContext(this);

@@ -87,8 +87,9 @@ public class MapActivity extends FragmentActivity
                     .addApi(LocationServices.API)
                     .build();
         }
-    }
 
+
+    }
 
     @Override
     public void onConnected(Bundle connectionHint) {
@@ -107,6 +108,7 @@ public class MapActivity extends FragmentActivity
     public void moveToCurrentLocation(){
         LatLng current = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
         mMap.addMarker(new MarkerOptions().position(current).title("You")).showInfoWindow();
+        mMap.addCircle(new CircleOptions().center(current).radius(30));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(current, 15));
     }
 
@@ -115,7 +117,7 @@ public class MapActivity extends FragmentActivity
      * This callback is triggered when the map is ready to be used.
      * This is where we can add markers or lines, add listeners or move the camera. In this case,
      * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
+     * If Google Play services is not installed on the device, the user will be prompted to ins`ll
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
      */
@@ -145,6 +147,8 @@ public class MapActivity extends FragmentActivity
         // We tried to connect but failed!
     }
 
+
+
     private void setFirebaseListeners(Firebase ref){
         ref.addChildEventListener(new ChildEventListener() {
             @Override
@@ -158,8 +162,7 @@ public class MapActivity extends FragmentActivity
                 fbLocations.add(lc);
                 LatLng pos = new LatLng(lat, lng);
                 mMap.addMarker(new MarkerOptions().position(pos).title(name).snippet("People: " + count)).showInfoWindow();
-
-                mMap.addCircle(new CircleOptions().center(pos).radius(100));
+                mMap.addCircle(new CircleOptions().center(pos).radius(30));
             }
 
             @Override

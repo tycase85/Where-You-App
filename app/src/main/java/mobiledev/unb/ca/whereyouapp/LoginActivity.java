@@ -50,6 +50,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.ResultCallbacks;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.Geofence;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
@@ -76,13 +81,16 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.xml.transform.Result;
+
 /**
  * A login screen that offers login via email/password.
  */
 
 public class LoginActivity extends AppCompatActivity
     implements GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener{
+        GoogleApiClient.OnConnectionFailedListener,
+        ResultCallback<Status>{
 
     private UserLoginTask mAuthTask = null;
     private final static String TAG = "LOGIN -";
@@ -101,12 +109,21 @@ public class LoginActivity extends AppCompatActivity
     private ArrayList<LocationData> mNearbyLocations;
 
     @Override
+    public void onResult(Status status) {
+        String toastMessage;
+        // PRES 4
+        if (status.isSuccess()) {
+            toastMessage = "Success: We Are Monitoring Our Fences";
+        } else {
+            toastMessage = "Error: We Are NOT Monitoring Our Fences";
+        }
+        Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
-        geoIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
 
         Firebase.setAndroidContext(this);
         ref = new Firebase(getResources().getString(R.string.firebaseUrl));
@@ -114,8 +131,6 @@ public class LoginActivity extends AppCompatActivity
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
 
         mPasswordView = (EditText) findViewById(R.id.password);
-
-
 
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -289,8 +304,6 @@ public class LoginActivity extends AppCompatActivity
 
                     showProgress(false);
                     startMainActivity();
-
-
                 }
 
                 @Override
@@ -312,7 +325,7 @@ public class LoginActivity extends AppCompatActivity
                 public void onSuccess(Map<String, Object> result) {
                     System.out.println("Successfully created user account with uid: " + result.get("uid"));
                     firebaseLogin();
-                    Toast.makeText(LoginActivity.this, "New account created successfully", Toast.LENGTH_SHORT);
+                    Toast.makeText(LoginActivity.this, "New account created successfully", Toast.LENGTH_SHORT).show();
                 }
 
                 @Override
@@ -336,7 +349,7 @@ public class LoginActivity extends AppCompatActivity
 
     @Override
     public void onConnectionFailed(ConnectionResult result) {
-        // We tried to connect but failed!
+        int i = 0;
     }
 
     @Override
@@ -383,15 +396,14 @@ public class LoginActivity extends AppCompatActivity
 
             do {
                 try {
-                    conn = (HttpURLConnection) new URL(temp)
-                            .openConnection();
+                    conn = (HttpURLConnection) new URL(temp).openConnection();
 
-                    in = new BufferedInputStream(
-                            conn.getInputStream());
+                    in = new BufferedInputStream(conn.getInputStream());
                     data = readStream(in);
                     responses.add(data);
                     JSONObject response = new JSONObject(data);
-                    temp = mNearbySearchURL += "&pagetoken=" + response.getString("next_page_token");
+                    if(data.contains("next_page_token"))
+                        temp = mNearbySearchURL += "&pagetoken=" + response.getString("next_page_token");
                 } catch (JSONException e){
                     Log.i(TAG, e.toString());
                     temp = "";
@@ -404,8 +416,6 @@ public class LoginActivity extends AppCompatActivity
                         conn.disconnect();
                 }
             } while(data.contains("next_page_token"));
-
-            responses.add(data);
 
             return responses;
         }
@@ -433,56 +443,58 @@ public class LoginActivity extends AppCompatActivity
             return data.toString();
         }
 
-        private ArrayList<LocationData> parseToLocationObjects(String data){
-            ArrayList<LocationData> arr = new ArrayList<LocationData>();
+        private ArrayList<LocationData> parseToLocationObjects(ArrayList<String> responses){
+            final ArrayList<LocationData> arr = new ArrayList<>();
 
-            try{
-                JSONObject response = new JSONObject(data);
-                JSONArray locationsResults = response.getJSONArray("results");
+            for(String data : responses) {
+                try {
+                    JSONObject response = new JSONObject(data);
+                    JSONArray locationsResults = response.getJSONArray("results");
 
-                for(int i = 0; i < locationsResults.length(); i++){
-                    JSONObject results = locationsResults.getJSONObject(i);
-                    JSONObject geo = results.getJSONObject("geometry");
-                    JSONObject location = geo.getJSONObject("location");
-                    final String placeID = results.getString("place_id");
-                    final String name = results.getString("name");
-                    final Double lat = location.getDouble("lat");
-                    final Double lng = location.getDouble("lng");
+                    for (int i = 0; i < locationsResults.length(); i++) {
+                        JSONObject results = locationsResults.getJSONObject(i);
+                        JSONObject geo = results.getJSONObject("geometry");
+                        JSONObject location = geo.getJSONObject("location");
+                        final String placeID = results.getString("place_id");
+                        final String name = results.getString("name");
+                        final Double lat = location.getDouble("lat");
+                        final Double lng = location.getDouble("lng");
+                        LocationData loc = new LocationData(name, lat, lng);
+                        loc.setId(placeID);
+                        arr.add(loc);
+                        ref.child("/locations/" + placeID).addListenerForSingleValueEvent(new ValueEventListener() {
 
-                    ref.child("/locations/" + placeID).addListenerForSingleValueEvent(new ValueEventListener() {
-
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            if(dataSnapshot.getValue() == null){
-                                LocationData loc = new LocationData (name, lat, lng);
-                                ref.child("/locations/" + placeID).setValue(loc);
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                if (dataSnapshot.getValue() == null) {
+                                    LocationData loc = new LocationData(name, lat, lng);
+                                    ref.child("/locations/" + placeID).setValue(loc);
+                                }
                             }
-                        }
 
-                        @Override
-                        public void onCancelled(FirebaseError firebaseError) {
-                            Log.i(TAG, firebaseError.getDetails());
-                        }
-                    });
+                            @Override
+                            public void onCancelled(FirebaseError firebaseError) {
+                                Log.i(TAG, firebaseError.getDetails());
+                            }
+                        });
+                    }
+                } catch (JSONException e) {
+                    Log.i(TAG, e.toString());
                 }
-            } catch (JSONException e){
-                Log.i(TAG, e.toString());
             }
-
             return arr;
         }
 
         @Override
         protected void onPostExecute(ArrayList<String> responses){
-            for(String data : responses) {
-                mNearbyLocations = parseToLocationObjects(data);
-            }
-
+            mNearbyLocations = parseToLocationObjects(responses);
             GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
 
+            ArrayList<Geofence> fences = new ArrayList<Geofence>();
+
             for(LocationData location : mNearbyLocations){
-                builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
-                builder.addGeofence(
+
+                fences.add(
                         new SimpleGeofence(
                                 location.getId(),
                                 location.getLat(),
@@ -490,12 +502,35 @@ public class LoginActivity extends AppCompatActivity
                         ).toGeofence()
                 );
             }
-            if(checkCallingPermission(ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+
+            fences.add(
+                    new SimpleGeofence(
+                            "0000TEMP_LOCATION",
+                            mLastLocation.getLatitude(),
+                            mLastLocation.getLongitude()
+                    ).toGeofence()
+            );
+
+            LocationData loc = new LocationData("Current", mLastLocation.getLatitude(), mLastLocation.getLongitude());
+            ref.child("locations").child("0000TEMP_LOCATION").setValue(loc);
+
+            builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
+            builder.addGeofences(fences);
+
+            GeofencingRequest req = builder.build();
+
+            Intent intent = new Intent(LoginActivity.this, GeofenceTransitionsReceiver.class);
+            intent.setAction("geofence_transition_action");
+            geoIntent = PendingIntent.getBroadcast(LoginActivity.this, R.id.geofence_transition_intent, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            int permissionCheck = ContextCompat.checkSelfPermission(LoginActivity.this,
+                    Manifest.permission.ACCESS_FINE_LOCATION);
+            if(permissionCheck == PackageManager.PERMISSION_GRANTED) {
                 LocationServices.GeofencingApi.addGeofences(
                         mGoogleApiClient,
-                        builder.build(),
+                        req,
                         geoIntent
-                );
+                ).setResultCallback(LoginActivity.this);
             }
         }
     }

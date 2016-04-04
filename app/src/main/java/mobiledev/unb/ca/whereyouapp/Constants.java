@@ -32,7 +32,7 @@ public final class Constants {
     public final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
     // Timeout for making a connection to GoogleApiClient (in milliseconds).
     public static final long CONNECTION_TIME_OUT_MS = 100;
-    public static final long GEOFENCE_RADIUS = 150;
+    public static final long GEOFENCE_RADIUS = 30;
 
     // For the purposes of this demo, the geofences are hard-coded and should not expire.
     // An app with dynamically-created geofences would want to include a reasonable expiration time.

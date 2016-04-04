@@ -2,4 +2,5 @@
 <resources>
     <item name="fab" type="id" />
     <item name="toolbar" type="id" />
+    <item name="geofence_transition_intent" type="id" />
 </resources>

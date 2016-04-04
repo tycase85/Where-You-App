@@ -33,7 +33,6 @@ public class SettingsActivity extends AppCompatActivity {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, items);
         dropdown.setAdapter(adapter);
 
-
         final ImageButton tab1 = (ImageButton) findViewById(R.id.mapTab);
         final ImageButton tab2 = (ImageButton) findViewById(R.id.friendTab);
 

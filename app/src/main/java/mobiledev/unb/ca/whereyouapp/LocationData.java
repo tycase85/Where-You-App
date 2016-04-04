@@ -7,7 +7,6 @@ package mobiledev.unb.ca.whereyouapp;
  */
 public class LocationData {
 
-
     private String id;
     private String name;
     private double lat;

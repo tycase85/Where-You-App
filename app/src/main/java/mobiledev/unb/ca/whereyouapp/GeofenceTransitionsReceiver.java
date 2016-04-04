@@ -24,12 +24,14 @@ package mobiledev.unb.ca.whereyouapp;
         import android.os.Bundle;
         import android.os.Handler;
         import android.os.Looper;
+        import android.support.v4.content.WakefulBroadcastReceiver;
         import android.util.Log;
         import android.widget.Toast;
 
         import com.firebase.client.DataSnapshot;
         import com.firebase.client.Firebase;
         import com.firebase.client.FirebaseError;
+        import com.firebase.client.Query;
         import com.firebase.client.ValueEventListener;
         import com.google.android.gms.common.ConnectionResult;
         import com.google.android.gms.common.api.GoogleApiClient;
@@ -38,22 +40,22 @@ package mobiledev.unb.ca.whereyouapp;
         import com.google.android.gms.wearable.PutDataMapRequest;
         import com.google.android.gms.wearable.Wearable;
 
+        import java.util.ArrayList;
+        import java.util.List;
         import java.util.concurrent.TimeUnit;
 
 /**
  * Listens for geofence transition changes.
  */
-public class GeofenceTransitionsIntentService extends IntentService {
+public class GeofenceTransitionsReceiver extends WakefulBroadcastReceiver {
+
+    Context context;
 
     private GoogleApiClient mGoogleApiClient;
+    final static String TAG = "TRANSITION";
 
-    public GeofenceTransitionsIntentService() {
-        super(GeofenceTransitionsIntentService.class.getSimpleName());
-    }
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
+    public GeofenceTransitionsReceiver() {
+        Log.i(TAG, "Constructed");
     }
 
     /**
@@ -62,47 +64,65 @@ public class GeofenceTransitionsIntentService extends IntentService {
      * Services (inside a PendingIntent) when addGeofences() is called.
      */
     @Override
-    protected void onHandleIntent(Intent intent) {
+    public void onReceive(Context context, Intent intent) {
+        Log.i(TAG, "Received");
+        this.context = context;
         final GeofencingEvent geoFenceEvent = GeofencingEvent.fromIntent(intent);
-        String uid = intent.getExtras().getString("placeID");
-        final Firebase location = new Firebase(getResources().getString(R.string.firebaseUrl) + "/locations/" + uid);
+        final List<Geofence> fences = geoFenceEvent.getTriggeringGeofences();
+        final ArrayList<String> ids = new ArrayList<>();
+        final ArrayList<Firebase> locations = new ArrayList<>();
 
         if (geoFenceEvent.hasError()) {
             int errorCode = geoFenceEvent.getErrorCode();
             Log.e(TAG, "Location Services error: " + errorCode);
         } else {
-            location.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot snapshot) {
-                    int count = (int) snapshot.child("count").getValue();
-                    int transitionType = geoFenceEvent.getGeofenceTransition();
-                    if (Geofence.GEOFENCE_TRANSITION_ENTER == transitionType) {
-                        showToast(GeofenceTransitionsIntentService.this, R.string.entering_geofence);
-                        location.child("count").setValue(count + 1);
-                    } else if (Geofence.GEOFENCE_TRANSITION_EXIT == transitionType) {
-                        showToast(GeofenceTransitionsIntentService.this, R.string.exiting_geofence);
-                        location.child("count").setValue(count - 1);
+            final int transitionType = geoFenceEvent.getGeofenceTransition();
+
+            if (Geofence.GEOFENCE_TRANSITION_ENTER == transitionType) {
+                Log.i(TAG, "Enter");
+                showToast(context, "ENTERED FENCE");
+            } else if (Geofence.GEOFENCE_TRANSITION_EXIT == transitionType) {
+                Log.i(TAG, "Exit");
+                showToast(context, "LEFT FENCE");
+            }
+
+            for(Geofence geofence : fences)
+                locations.add(new Firebase(context.getResources().getString(R.string.firebaseUrl) + "/locations/" + geofence.getRequestId()));
+
+            for(final Firebase firebase : locations) {
+                firebase.addValueEventListener(new ValueEventListener() {
+
+                    @Override
+                    public void onDataChange(DataSnapshot snapshot) {
+                        long count = (long) snapshot.child("count").getValue();
+
+                        if (Geofence.GEOFENCE_TRANSITION_ENTER == transitionType) {
+                            Log.i(TAG, "Enter");
+                            firebase.child("count").setValue(count + 1);
+                        } else if (Geofence.GEOFENCE_TRANSITION_EXIT == transitionType) {
+                            Log.i(TAG, "Exit");
+                            firebase.child("count").setValue(count - 1);
+                        }
                     }
-                }
 
-                @Override
-                public void onCancelled(FirebaseError firebaseError) {
+                    @Override
+                    public void onCancelled(FirebaseError firebaseError) {
 
-                }
-            });
-
+                    }
+                });
+            }
         }
     }
 
     /**
      * Showing a toast message, using the Main thread
      */
-    private void showToast(final Context context, final int resourceId) {
+    private void showToast(final Context context, final String message) {
         Handler mainThread = new Handler(Looper.getMainLooper());
         mainThread.post(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(context, context.getString(resourceId), Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, message, Toast.LENGTH_LONG).show();
             }
         });
     }

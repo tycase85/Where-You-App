@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -21,12 +22,15 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
+import com.firebase.client.ValueEventListener;
+import com.firebase.ui.FirebaseRecyclerAdapter;
 import com.google.android.gms.plus.model.people.Person;
 
 import java.util.ArrayList;
@@ -41,16 +45,12 @@ public class FriendActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         final EditText input = new EditText(this);
+        final SharedPreferences pref = getSharedPreferences("userInfo", 0);
 
         Firebase.setAndroidContext(this);
         final Firebase ref = new Firebase(getResources().getString(R.string.firebaseUrl) + "/users/");
 
-
-        List<FriendData> data = fill_with_data();
-
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
-        Recycler_View_Adapter adapter = new Recycler_View_Adapter(data, getApplication());
-        recyclerView.setAdapter(adapter);
+        final RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
@@ -61,10 +61,6 @@ public class FriendActivity extends AppCompatActivity {
         final ImageButton tab1 = (ImageButton) findViewById(R.id.mapTab);
         final ImageButton tab2 = (ImageButton) findViewById(R.id.settingsTab);
 
-        //final TextView friendTab1 = (TextView) findViewById(R.id.friend1);
-        //final TextView friendTab2 = (TextView) findViewById(R.id.friend2);
-        //final TextView friendTab3 = (TextView) findViewById(R.id.friend3);
-
         recyclerView.addOnItemTouchListener(
                 new RecyclerItemClickListener(this, new RecyclerItemClickListener.OnItemClickListener() {
                     @Override public void onItemClick(View view, int position) {
@@ -73,17 +69,14 @@ public class FriendActivity extends AppCompatActivity {
                             AlertDialog alertDialog = new AlertDialog.Builder(FriendActivity.this).create();
 
 // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-                            input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                            input.setInputType(InputType.TYPE_CLASS_TEXT);
                             alertDialog.setView(input);
-                            alertDialog.setMessage("Edit Info");
+                            alertDialog.setMessage("Edit Name");
                             alertDialog.setButton("Open Window", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
 
                                 }
                             });
-
-
-
                             alertDialog.show();
                         }
                     }
@@ -112,60 +105,24 @@ public class FriendActivity extends AppCompatActivity {
                     }
                 });
 
-       /* friendTab1.setOnClickListener
-                (new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
+        ref.child(pref.getString("uid", "")).child("friends").addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                List<FriendData> adapterList = new ArrayList<>();
+                for (DataSnapshot snap : dataSnapshot.getChildren()) {
+                    FriendData f = new FriendData((String) snap.getValue());
+                    adapterList.add(f);
+                }
+                Recycler_View_Adapter adapter = new Recycler_View_Adapter(adapterList, getApplication());
+                recyclerView.setAdapter(adapter);
+                }
 
-                        AlertDialog alertDialog = new AlertDialog.Builder(FriendActivity.this).create();
-                        alertDialog.setMessage("Edit Info");
-                        alertDialog.setButton("Open Window", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
+                @Override
+                public void onCancelled(FirebaseError firebaseError) {
 
-                            }
-                        });
-
-
-
-                        alertDialog.show();
-                    }
-                });
-
-        friendTab2.setOnClickListener
-                (new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        AlertDialog alertDialog = new AlertDialog.Builder(FriendActivity.this).create();
-                        alertDialog.setMessage("Edit Info");
-                        alertDialog.setButton("Open Window", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-
-                            }
-                        });
-
-
-
-                        alertDialog.show();
-                    }
-                });
-        friendTab3.setOnClickListener
-                (new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        AlertDialog alertDialog = new AlertDialog.Builder(FriendActivity.this).create();
-                        alertDialog.setMessage("Edit Info");
-                        alertDialog.setButton("Open Window", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-
-                            }
-                        });
-
-
-
-                        alertDialog.show();
-                    }
-                });
-*/
+                }
+            }
+        );
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -192,7 +149,11 @@ public class FriendActivity extends AppCompatActivity {
                             @Override
                             public void onChildAdded(DataSnapshot snapshot, String previousChild) {
                                 if(snapshot.child("email").getValue().equals(m_Text)) {
-                                    ref.child()
+                                    ref.child(pref.getString("uid", "")).child("friends").child(snapshot.getKey()).setValue(m_Text);
+                                }
+                                else
+                                {
+                                    Toast.makeText(getApplicationContext(), "Some Message", Toast.LENGTH_LONG).show();
                                 }
                             }
 
@@ -231,19 +192,6 @@ public class FriendActivity extends AppCompatActivity {
         });
     }
 
-    public List<FriendData> fill_with_data() {
-
-        List<FriendData> data = new ArrayList<>();
-
-        data.add(new FriendData("Alex F.", "Settings", R.drawable.contact));
-        data.add(new FriendData("Beth C.", "Settings", R.drawable.contact));
-        data.add(new FriendData("Frank P.", "Settings", R.drawable.contact));
-        data.add(new FriendData("Megan L.", "Settings", R.drawable.contact));
-        data.add(new FriendData("Oscar W.", "Settings", R.drawable.contact));
-        data.add(new FriendData("Robert S.", "Settings", R.drawable.contact));
-
-        return data;
-    }
 
     private void setFirebaseListeners(Firebase ref){
        // Query queryRef = ref.orderByChild("email").equalTo(email.getValue());
@@ -251,7 +199,7 @@ public class FriendActivity extends AppCompatActivity {
         ref.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot snapshot, String str) {
-               System.out.println(snapshot.getKey());
+                System.out.println(snapshot.getKey());
 
             }
 
@@ -262,12 +210,12 @@ public class FriendActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onChildChanged(DataSnapshot snapshot, String str){
+            public void onChildChanged(DataSnapshot snapshot, String str) {
 
             }
 
             @Override
-            public void onChildMoved(DataSnapshot snapshot, String str){
+            public void onChildMoved(DataSnapshot snapshot, String str) {
 
             }
 

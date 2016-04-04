@@ -6,12 +6,17 @@ package mobiledev.unb.ca.whereyouapp;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends FragmentActivity {
 
@@ -23,8 +28,6 @@ public class MainActivity extends FragmentActivity {
         final Button button1 = (Button) findViewById(R.id.mapButt);
         final Button button2 = (Button) findViewById(R.id.friendButt);
         final Button button3 = (Button) findViewById(R.id.settingsButt);
-        final Button mFireBtn = (Button) findViewById(R.id.btnFireDemo);
-        final Button mPlacesBtn = (Button) findViewById(R.id.btnPlaces);
 
         button1.setOnClickListener
                 (new View.OnClickListener() {
@@ -53,20 +56,12 @@ public class MainActivity extends FragmentActivity {
                     }
                 });
 
-        mFireBtn.setOnClickListener
-                (new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent intent = new Intent(MainActivity.this, PlayWithFirebase.class);
-                        startActivity(intent);
-                    }
-                });
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_play_with_firebase, menu);
+        getMenuInflater().inflate(R.menu.menu_settings, menu);
         return true;
     }
 

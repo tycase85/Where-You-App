@@ -59,19 +59,6 @@
         android:id="@+id/settingsButt"
         android:layout_gravity="center_horizontal" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Firebase (Temporary)"
-        android:id="@+id/btnFireDemo"
-        android:layout_gravity="center_horizontal" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Places (Temporary)"
-        android:id="@+id/btnPlaces"
-        android:layout_gravity="center_horizontal" />
 
     <Space
         android:layout_width="match_parent"

@@ -43,6 +43,7 @@ public class Recycler_View_Adapter extends RecyclerView.Adapter<View_Holder> {
     public void onBindViewHolder(View_Holder holder, int position) {
 
         //Use the provided View Holder on the onCreateViewHolder method to populate the current row on the RecyclerView
+
         holder.email.setText(list.get(position).email);
         animate(holder);
 

@@ -19,6 +19,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.text.method.ScrollingMovementMethod;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -53,17 +54,21 @@ public class FriendActivity extends AppCompatActivity {
         final RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
+        final RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
         itemAnimator.setAddDuration(1000);
         itemAnimator.setRemoveDuration(1000);
         recyclerView.setItemAnimator(itemAnimator);
+        final List<FriendData> adapterList = new ArrayList<>();
+        final Recycler_View_Adapter adapter = new Recycler_View_Adapter(adapterList, getApplication());
+        recyclerView.setAdapter(adapter);
+
 
         final ImageButton tab1 = (ImageButton) findViewById(R.id.mapTab);
         final ImageButton tab2 = (ImageButton) findViewById(R.id.settingsTab);
-
+        final Intent intent = new Intent(FriendActivity.this, FriendActivity.class);
         recyclerView.addOnItemTouchListener(
                 new RecyclerItemClickListener(this, new RecyclerItemClickListener.OnItemClickListener() {
-                    @Override public void onItemClick(View view, int position) {
+                    @Override public void onItemClick(final View view, final int position) {
                         {
                             AlertDialog alertDialog = new AlertDialog.Builder(FriendActivity.this).create();
 // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
@@ -72,11 +77,15 @@ public class FriendActivity extends AppCompatActivity {
                             alertDialog.setMessage("Edit Name");
                             alertDialog.setButton("Open Window", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
-
+                                    recyclerView.getAdapter().notifyItemRemoved(position);
+                                    //adapter.remove(adapterList.remove(position));
+                                    //adapterList.remove(position);
+                                    startActivity(intent);
                                 }
                             });
                             alertDialog.show();
                         }
+
                     }
                 })
         );
@@ -146,7 +155,7 @@ public class FriendActivity extends AppCompatActivity {
                                 }
                                 else
                                 {
-                                    Toast.makeText(getApplicationContext(), "Some Message", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(FriendActivity.this, "Some Message", Toast.LENGTH_LONG).show();
                                 }
                             }
 
@@ -173,10 +182,43 @@ public class FriendActivity extends AppCompatActivity {
                         });
                     }
                 });
-                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                builder.setNegativeButton("Delete", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
+                        m_Text = input.getText().toString();
+                        final Query queryRef = ref.orderByChild("email").equalTo(m_Text);
+
+                        queryRef.addChildEventListener(new ChildEventListener() {
+                            @Override
+                            public void onChildAdded(DataSnapshot snapshot, String previousChild) {
+                                if (snapshot.child("email").getValue().equals(m_Text)) {
+                                    ref.child(pref.getString("uid", "")).child("friends").child(snapshot.getKey()).setValue(null);
+                                } else {
+                                    Toast.makeText(FriendActivity.this, "Some Message", Toast.LENGTH_LONG).show();
+                                }
+                            }
+
+                            @Override
+                            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                            }
+
+                            @Override
+                            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                            }
+
+                            @Override
+                            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                            }
+
+                            @Override
+                            public void onCancelled(FirebaseError firebaseError) {
+
+                            }
+                            // ....
+                        });
                     }
                 });
 
@@ -186,37 +228,6 @@ public class FriendActivity extends AppCompatActivity {
     }
 
 
-    private void setFirebaseListeners(Firebase ref){
-       // Query queryRef = ref.orderByChild("email").equalTo(email.getValue());
 
-        ref.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot snapshot, String str) {
-                System.out.println(snapshot.getKey());
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot snapshot) {
-                String title = (String) snapshot.child("title").getValue();
-                System.out.println("The blog post titled " + title + " has been deleted");
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot snapshot, String str) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot snapshot, String str) {
-
-            }
-
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-                System.out.println("The read failed: " + firebaseError.getMessage());
-            }
-        });
-    }
 
 }

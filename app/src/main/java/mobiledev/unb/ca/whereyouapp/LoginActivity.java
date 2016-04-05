@@ -110,14 +110,7 @@ public class LoginActivity extends AppCompatActivity
 
     @Override
     public void onResult(Status status) {
-        String toastMessage;
-        // PRES 4
-        if (status.isSuccess()) {
-            toastMessage = "Success: We Are Monitoring Our Fences";
-        } else {
-            toastMessage = "Error: We Are NOT Monitoring Our Fences";
-        }
-        Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show();
+
     }
 
     @Override

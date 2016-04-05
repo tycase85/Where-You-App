@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/dialog_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="30dp"
+        android:text="'WhereYouApp?' will let you see what's going on around you!\n\nJust hit The Map button to see how many people are at venues in your area\n\nClicking markers will give you an estimate of how many people are currently there.\n\nYou can add friends who are using the app with the email address they used to sign in.\n\nIf they have shared their locations, you'll be able to see where they are." />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_below="@id/dialog_info">
+
+    </LinearLayout>
+</RelativeLayout>

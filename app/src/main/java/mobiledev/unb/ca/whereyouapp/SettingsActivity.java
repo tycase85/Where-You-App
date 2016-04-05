@@ -18,8 +18,11 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.Spinner;
+import android.widget.Switch;
+import android.widget.ToggleButton;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
@@ -30,50 +33,31 @@ import java.util.List;
 
 public class SettingsActivity extends AppCompatActivity {
     Firebase settingsRef;
-    private Boolean val1 = true;
-    Menu menu;
+    Switch mToggle;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        final Spinner dropdown = (Spinner)findViewById(R.id.spinner1);
-        String[] items = new String[]{"On", "Off"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, items);
-        dropdown.setAdapter(adapter);
-        SharedPreferences pref = getSharedPreferences("userInfo", 0);
+
+        mToggle = (Switch) findViewById(R.id.locationSwitch);
+        Boolean checked = getSharedPreferences("userInfo", 0).getBoolean("shareLocation", false);
+        mToggle.setChecked(checked);
+        final SharedPreferences pref = getSharedPreferences("userInfo", 0);
         settingsRef = new Firebase(getResources().getString(R.string.firebaseUrl) + "/users/" + pref.getString("uid", "")).child("shareLocation");
 
-        settingsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        mToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if(dataSnapshot.getValue() == null || !(Boolean) dataSnapshot.getValue()){
-                    dropdown.setSelection(1);
-                } else {
-                    dropdown.setSelection(0);
-                }
-            }
-
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-                Log.i("", firebaseError.getDetails());
-            }
-        });
-
-        dropdown.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String value = dropdown.getSelectedItem().toString();
-                if (value.equals("On"))
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (mToggle.isChecked()) {
                     settingsRef.setValue(true);
-                else
+                    pref.edit().putBoolean("shareLocation", true).apply();
+                } else {
                     settingsRef.setValue(false);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
+                    pref.edit().putBoolean("shareLocation", false).apply();
+                }
             }
         });
         
@@ -84,32 +68,18 @@ public class SettingsActivity extends AppCompatActivity {
                 (new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-
                         Intent intent = new Intent(SettingsActivity.this, MapActivity.class);
                         startActivity(intent);
-
                     }
                 });
         tab2.setOnClickListener
                 (new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-
                         Intent intent = new Intent(SettingsActivity.this, FriendActivity.class);
                         startActivity(intent);
-
                     }
                 });
-
-
-//       FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Intent intent = new Intent(SettingsActivity.this, MainActivity.class);
-//                startActivity(intent);
-//            }
-//        });
     }
 
     @Override

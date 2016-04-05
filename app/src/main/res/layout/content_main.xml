@@ -26,12 +26,6 @@
         android:layout_gravity="center_horizontal"
         android:layout_weight="0.17" />
 
-    <com.google.android.gms.common.SignInButton
-        android:id="@+id/sign_in_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal" />
-
     <Space
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -59,6 +53,12 @@
         android:id="@+id/settingsButt"
         android:layout_gravity="center_horizontal" />
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="About"
+        android:id="@+id/aboutButt"
+        android:layout_gravity="center_horizontal" />
 
     <Space
         android:layout_width="match_parent"

@@ -80,17 +80,15 @@ public class GeofenceTransitionsReceiver extends WakefulBroadcastReceiver {
 
             if (Geofence.GEOFENCE_TRANSITION_ENTER == transitionType) {
                 Log.i(TAG, "Enter");
-                showToast(context, "ENTERED FENCE");
             } else if (Geofence.GEOFENCE_TRANSITION_EXIT == transitionType) {
                 Log.i(TAG, "Exit");
-                showToast(context, "LEFT FENCE");
             }
 
             for(Geofence geofence : fences)
                 locations.add(new Firebase(context.getResources().getString(R.string.firebaseUrl) + "/locations/" + geofence.getRequestId()));
 
             for(final Firebase firebase : locations) {
-                firebase.addValueEventListener(new ValueEventListener() {
+                firebase.addListenerForSingleValueEvent(new ValueEventListener() {
 
                     @Override
                     public void onDataChange(DataSnapshot snapshot) {

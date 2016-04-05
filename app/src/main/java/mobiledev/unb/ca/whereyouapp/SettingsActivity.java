@@ -44,14 +44,14 @@ public class SettingsActivity extends AppCompatActivity {
         dropdown.setAdapter(adapter);
         SharedPreferences pref = getSharedPreferences("userInfo", 0);
         settingsRef = new Firebase(getResources().getString(R.string.firebaseUrl) + "/users/" + pref.getString("uid", "")).child("shareLocation");
+
         settingsRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                val1 = (Boolean) dataSnapshot.getValue();
-                if (val1) {
-                    dropdown.setSelection(0);
-                } else {
+                if(dataSnapshot.getValue() == null || !(Boolean) dataSnapshot.getValue()){
                     dropdown.setSelection(1);
+                } else {
+                    dropdown.setSelection(0);
                 }
             }
 

@@ -65,9 +65,7 @@ public class FriendActivity extends AppCompatActivity {
                 new RecyclerItemClickListener(this, new RecyclerItemClickListener.OnItemClickListener() {
                     @Override public void onItemClick(View view, int position) {
                         {
-
                             AlertDialog alertDialog = new AlertDialog.Builder(FriendActivity.this).create();
-
 // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
                             input.setInputType(InputType.TYPE_CLASS_TEXT);
                             alertDialog.setView(input);
@@ -87,10 +85,8 @@ public class FriendActivity extends AppCompatActivity {
                 (new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-
                         Intent intent = new Intent(FriendActivity.this, MapActivity.class);
                         startActivity(intent);
-
                     }
                 });
 
@@ -98,10 +94,8 @@ public class FriendActivity extends AppCompatActivity {
                 (new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-
                         Intent intent = new Intent(FriendActivity.this, SettingsActivity.class);
                         startActivity(intent);
-
                     }
                 });
 
@@ -109,10 +103,12 @@ public class FriendActivity extends AppCompatActivity {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                 List<FriendData> adapterList = new ArrayList<>();
+
                 for (DataSnapshot snap : dataSnapshot.getChildren()) {
                     FriendData f = new FriendData((String) snap.getValue());
                     adapterList.add(f);
                 }
+
                 Recycler_View_Adapter adapter = new Recycler_View_Adapter(adapterList, getApplication());
                 recyclerView.setAdapter(adapter);
                 }
@@ -132,13 +128,10 @@ public class FriendActivity extends AppCompatActivity {
                 AlertDialog.Builder builder = new AlertDialog.Builder(FriendActivity.this);
                 builder.setTitle("Add Contact");
 
-// Set up the input
                 final EditText input = new EditText(FriendActivity.this);
-// Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
                 input.setInputType(InputType.TYPE_CLASS_TEXT);
                 builder.setView(input);
 
-// Set up the buttons
                 builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {

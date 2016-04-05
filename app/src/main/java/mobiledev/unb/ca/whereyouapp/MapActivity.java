@@ -34,8 +34,10 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.BufferedInputStream;
@@ -43,10 +45,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import static mobiledev.unb.ca.whereyouapp.Constants.GEOFENCE_EXPIRATION_TIME;
 
@@ -56,6 +60,8 @@ public class MapActivity extends FragmentActivity
         GoogleApiClient.OnConnectionFailedListener {
 
     private GoogleMap mMap;
+    private Marker marker;
+    private HashMap<String, Marker> locationMarkers = new HashMap<>();
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest locationRequest;
     private LocationListener locationListener;
@@ -63,7 +69,6 @@ public class MapActivity extends FragmentActivity
     private String testOutput = "";
     private Firebase ref;
     private ArrayList<LocationData> fbLocations;
-    private SimpleGeofence mYerbaBuenaGeofence;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,7 +93,6 @@ public class MapActivity extends FragmentActivity
                     .build();
         }
 
-
     }
 
     @Override
@@ -107,9 +111,11 @@ public class MapActivity extends FragmentActivity
 
     public void moveToCurrentLocation(){
         LatLng current = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-        mMap.addMarker(new MarkerOptions().position(current).title("You")).showInfoWindow();
-        mMap.addCircle(new CircleOptions().center(current).radius(30));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(current, 15));
+        if(marker == null)
+            marker = mMap.addMarker(new MarkerOptions().position(current).title("You!").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA)));
+        else
+            marker.setPosition(current);
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(current, 15));
     }
 
     /**
@@ -147,12 +153,11 @@ public class MapActivity extends FragmentActivity
         // We tried to connect but failed!
     }
 
-
-
     private void setFirebaseListeners(Firebase ref){
         ref.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot snapshot, String str) {
+                String key = (String) snapshot.getKey();
                 String name = (String) snapshot.child("name").getValue();
                 double lat = (double) snapshot.child("lat").getValue();
                 double lng = (double) snapshot.child("lng").getValue();
@@ -161,8 +166,24 @@ public class MapActivity extends FragmentActivity
                 LocationData lc = new LocationData(name, lat, lng, count);
                 fbLocations.add(lc);
                 LatLng pos = new LatLng(lat, lng);
-                mMap.addMarker(new MarkerOptions().position(pos).title(name).snippet("People: " + count)).showInfoWindow();
-                mMap.addCircle(new CircleOptions().center(pos).radius(30));
+                float hue = BitmapDescriptorFactory.HUE_CYAN;
+                if(name.equals("Vault 29"))
+                    Log.i("hi","hi");
+                if(count > 30 && count < 60)
+                    hue = BitmapDescriptorFactory.HUE_YELLOW;
+                else if(count > 60 && count < 90){
+                    hue = BitmapDescriptorFactory.HUE_ORANGE;
+                } else if(count >= 90)
+                    hue = BitmapDescriptorFactory.HUE_RED;
+
+                if(locationMarkers.containsKey(key)) {
+                    marker.setPosition(pos);
+                    marker.setIcon(BitmapDescriptorFactory.defaultMarker(hue));
+                } else {
+                    Marker marker = mMap.addMarker(new MarkerOptions().position(pos).title(name).icon(BitmapDescriptorFactory.defaultMarker(hue)).snippet("People: " + count));
+                    locationMarkers.put(key, marker);
+                    marker.showInfoWindow();
+                }
             }
 
             @Override

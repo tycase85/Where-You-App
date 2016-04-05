@@ -501,18 +501,8 @@ public class LoginActivity extends AppCompatActivity
                                 location.getLng()
                         ).toGeofence()
                 );
+                Log.i("FENCE", "Added " + location.getName());
             }
-
-            fences.add(
-                    new SimpleGeofence(
-                            "0000TEMP_LOCATION",
-                            mLastLocation.getLatitude(),
-                            mLastLocation.getLongitude()
-                    ).toGeofence()
-            );
-
-            LocationData loc = new LocationData("Current", mLastLocation.getLatitude(), mLastLocation.getLongitude());
-            ref.child("locations").child("0000TEMP_LOCATION").setValue(loc);
 
             builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
             builder.addGeofences(fences);

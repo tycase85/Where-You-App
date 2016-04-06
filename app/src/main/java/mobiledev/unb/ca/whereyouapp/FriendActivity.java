@@ -56,7 +56,6 @@ public class FriendActivity extends AppCompatActivity {
         setContentView(R.layout.activity_friend);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        final EditText input = new EditText(this);
         final SharedPreferences pref = getSharedPreferences("userInfo", 0);
 
         Firebase.setAndroidContext(this);
@@ -71,25 +70,6 @@ public class FriendActivity extends AppCompatActivity {
 
         final ImageButton tab1 = (ImageButton) findViewById(R.id.mapTab);
         final ImageButton tab2 = (ImageButton) findViewById(R.id.settingsTab);
-
-//        mRecyclerView.addOnItemTouchListener(
-//                new RecyclerItemClickListener(this, new RecyclerItemClickListener.OnItemClickListener() {
-//                    @Override public void onItemClick(View view, int position) {
-//                        {
-//                            AlertDialog alertDialog = new AlertDialog.Builder(FriendActivity.this).create();
-//                            input.setInputType(InputType.TYPE_CLASS_TEXT);
-//                            alertDialog.setView(input);
-//                            alertDialog.setMessage("Edit Name");
-//                            alertDialog.setButton("Open Window", new DialogInterface.OnClickListener() {
-//                                public void onClick(DialogInterface dialog, int which) {
-//
-//                                }
-//                            });
-//                            alertDialog.show();
-//                        }
-//                    }
-//                })
-//        );
 
         tab1.setOnClickListener
                 (new View.OnClickListener() {
@@ -138,7 +118,7 @@ public class FriendActivity extends AppCompatActivity {
                 builder.setTitle("Add Contact");
 
                 final EditText input = new EditText(FriendActivity.this);
-                input.setInputType(InputType.TYPE_CLASS_TEXT);
+                input.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
                 builder.setView(input);
 
                 builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -146,16 +126,28 @@ public class FriendActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         m_Text = input.getText().toString();
                         final Query queryRef = ref.orderByChild("email").equalTo(m_Text);
+                        int itemCount = mAdapter.getItemCount();
+
+                        queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                if(dataSnapshot.getChildrenCount() != 1)
+                                    Toast.makeText(FriendActivity.this, "User does not exist", Toast.LENGTH_SHORT).show();
+                            }
+
+                            @Override
+                            public void onCancelled(FirebaseError firebaseError) {
+
+                            }
+                        });
 
                         queryRef.addChildEventListener(new ChildEventListener() {
                             @Override
                             public void onChildAdded(DataSnapshot snapshot, String previousChild) {
-                                if(snapshot.child("email").getValue().equals(m_Text)) {
+                                if (snapshot.child("email").getValue().equals(m_Text)) {
                                     ref.child(pref.getString("uid", "")).child("friends").child(snapshot.getKey()).setValue(m_Text);
-                                }
-                                else
-                                {
-                                    Toast.makeText(getApplicationContext(), "Some Message", Toast.LENGTH_LONG).show();
+                                } else {
+                                    Toast.makeText(FriendActivity.this, "Some Message", Toast.LENGTH_LONG).show();
                                 }
                             }
 
@@ -176,9 +168,9 @@ public class FriendActivity extends AppCompatActivity {
 
                             @Override
                             public void onCancelled(FirebaseError firebaseError) {
-
+                                Toast.makeText(FriendActivity.this, "User with that email does not exist.", Toast.LENGTH_LONG).show();
                             }
-                            // ....
+
                         });
                     }
                 });
@@ -202,9 +194,9 @@ public class FriendActivity extends AppCompatActivity {
             public TextView mTextView;
             public String key;
 
-            public ViewHolder(TextView v) {
+            public ViewHolder(View v) {
                 super(v);
-                mTextView = v;
+                mTextView = (TextView) v.findViewById(R.id.friendEmail);
             }
         }
 
@@ -215,11 +207,11 @@ public class FriendActivity extends AppCompatActivity {
         @Override
         public MyAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             //Inflate the layout, initialize the View Holder
-            TextView v = (TextView) LayoutInflater.from(parent.getContext()).inflate(R.layout.text_view_layout, parent, false);
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_layout, parent, false);
             final ViewHolder holder = new ViewHolder(v);
-            v.setOnClickListener(new View.OnClickListener() {
+            v.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
-                public void onClick(final View v) {
+                public boolean onLongClick(final View v) {
                     {
                         AlertDialog.Builder alert = new AlertDialog.Builder(
                                 FriendActivity.this);
@@ -245,6 +237,7 @@ public class FriendActivity extends AppCompatActivity {
 
                         alert.show();
                     }
+                    return false;
                 }
             });
 

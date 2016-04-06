@@ -92,14 +92,15 @@ public class GeofenceTransitionsReceiver extends WakefulBroadcastReceiver {
 
                     @Override
                     public void onDataChange(DataSnapshot snapshot) {
-                        long count = (long) snapshot.child("count").getValue();
+                        Object a = snapshot.child("count").getValue();
+                        if(a != null) {
+                            long count = (long) a;
 
-                        if (Geofence.GEOFENCE_TRANSITION_ENTER == transitionType) {
-                            Log.i(TAG, "Enter");
-                            firebase.child("count").setValue(count + 1);
-                        } else if (Geofence.GEOFENCE_TRANSITION_EXIT == transitionType) {
-                            Log.i(TAG, "Exit");
-                            firebase.child("count").setValue(count - 1);
+                            if (Geofence.GEOFENCE_TRANSITION_ENTER == transitionType) {
+                                firebase.child("count").setValue(count + 1);
+                            } else if (Geofence.GEOFENCE_TRANSITION_EXIT == transitionType) {
+                                firebase.child("count").setValue(count - 1);
+                            }
                         }
                     }
 

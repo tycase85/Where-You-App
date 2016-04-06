@@ -249,7 +249,7 @@ public class LoginActivity extends AppCompatActivity
 
         private final String mEmail;
         private final String mPassword;
-        private final boolean mLoginSuccess = false;
+        private boolean mCreationError = false;
         private AuthData mAuthData = null;
 
         UserLoginTask(String email, String password) {
@@ -291,8 +291,8 @@ public class LoginActivity extends AppCompatActivity
                     edit.apply();
                     Firebase user = ref.child("users/" + authData.getUid());
                     user.child("email").setValue(mEmail);
-                    user.child("lat").setValue(55);
-                    user.child("lng").setValue(55);
+                    user.child("lat").setValue(mLastLocation.getLatitude());
+                    user.child("lng").setValue(mLastLocation.getLongitude());
                     Log.i("FBLOG", "location saved");
 
                     showProgress(false);
@@ -301,10 +301,11 @@ public class LoginActivity extends AppCompatActivity
 
                 @Override
                 public void onAuthenticationError(FirebaseError firebaseError) {
-                    if (firebaseError.getCode() != FirebaseError.EMAIL_TAKEN) {
+                    if (firebaseError.getCode() != FirebaseError.EMAIL_TAKEN && firebaseError.getCode() != FirebaseError.INVALID_PASSWORD && !mCreationError) {
                         createFirebaseUser();
                     } else {
                         Toast.makeText(LoginActivity.this, "Auth error " + firebaseError.getMessage(), Toast.LENGTH_SHORT).show();
+                        showProgress(false);
                     }
                 }
             });
@@ -324,6 +325,9 @@ public class LoginActivity extends AppCompatActivity
                 @Override
                 public void onError(FirebaseError firebaseError) {
                     Log.e("FIREBASE", "error creating new user");
+                    Toast.makeText(LoginActivity.this, "Error creating account, try a valid email", Toast.LENGTH_SHORT).show();
+                    mCreationError = true;
+                    showProgress(false);
                 }
             });
         }

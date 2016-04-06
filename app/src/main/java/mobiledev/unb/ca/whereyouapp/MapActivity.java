@@ -210,8 +210,8 @@ public class MapActivity extends FragmentActivity
                     hue = BitmapDescriptorFactory.HUE_RED;
 
                 if(locationMarkers.containsKey(key)) {
-                    Boolean shown = yourMarker.isInfoWindowShown();
                     Marker marker = locationMarkers.get(key);
+                    Boolean shown = marker.isInfoWindowShown();
                     marker.setIcon(BitmapDescriptorFactory.defaultMarker(hue));
                     marker.setSnippet("People: " + count);
                     if(shown)

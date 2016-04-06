@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_weight="0.17" />
+        android:layout_weight="0.10" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -19,13 +19,38 @@
         android:id="@+id/textView4"
         android:layout_gravity="center_horizontal"
         android:textIsSelectable="true"
-        android:textSize="40dp" />
+        android:textSize="40dp"
+        android:textStyle="bold" />
+
 
     <Space
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_weight="0.17" />
+        android:layout_weight="0.20" />
+
+    <Button
+        android:background="@color/colorAccent"
+        android:textColor="@color/cardview_light_background"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Map"
+        android:id="@+id/mapButt"
+        android:layout_gravity="center_horizontal" />
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_weight="0.10" />
+
+    <Button
+        android:background="@color/colorAccent"
+        android:textColor="@color/cardview_light_background"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Friends"
+        android:id="@+id/friendButt"
+        android:layout_gravity="center_horizontal" />
 
     <Space
         android:layout_width="match_parent"
@@ -34,27 +59,23 @@
         android:layout_weight="0.10" />
 
     <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Map"
-        android:id="@+id/mapButt"
-        android:layout_gravity="center_horizontal" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Friends"
-        android:id="@+id/friendButt"
-        android:layout_gravity="center_horizontal" />
-
-    <Button
+        android:background="@color/colorAccent"
+        android:textColor="@color/cardview_light_background"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Settings"
         android:id="@+id/settingsButt"
         android:layout_gravity="center_horizontal" />
 
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_weight="0.10" />
+
     <Button
+        android:background="@color/colorAccent"
+        android:textColor="@color/cardview_light_background"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="About"

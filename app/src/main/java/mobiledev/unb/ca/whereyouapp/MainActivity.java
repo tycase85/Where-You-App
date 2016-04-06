@@ -97,6 +97,8 @@ public class MainActivity extends FragmentActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 SharedPreferences.Editor edit = getSharedPreferences("userInfo", 0).edit();
                 mShared = (Boolean) dataSnapshot.getValue();
+                if(mShared == null)
+                    mShared = true;
                 edit.putBoolean("shareLocation", mShared).apply();
             }
 

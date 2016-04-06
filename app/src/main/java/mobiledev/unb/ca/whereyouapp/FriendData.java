@@ -8,10 +8,10 @@ import java.util.List;
  */
 public class FriendData {
     public String email;
-    public String option;
-    public int imageId;
+    public String key;
 
-    FriendData(String email){
+    FriendData(String email, String key){
         this.email = email;
+        this.key = key;
     }
 }

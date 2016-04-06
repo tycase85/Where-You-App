@@ -60,7 +60,7 @@ public class MapActivity extends FragmentActivity
         GoogleApiClient.OnConnectionFailedListener {
 
     private GoogleMap mMap;
-    private Marker marker;
+    private Marker yourMarker;
     private HashMap<String, Marker> locationMarkers = new HashMap<>();
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest locationRequest;
@@ -111,10 +111,10 @@ public class MapActivity extends FragmentActivity
 
     public void moveToCurrentLocation(){
         LatLng current = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-        if(marker == null)
-            marker = mMap.addMarker(new MarkerOptions().position(current).title("You!").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA)));
+        if(yourMarker == null)
+            yourMarker = mMap.addMarker(new MarkerOptions().position(current).title("You!").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA)));
         else
-            marker.setPosition(current);
+            yourMarker.setPosition(current);
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(current, 15));
     }
 
@@ -167,8 +167,6 @@ public class MapActivity extends FragmentActivity
                 fbLocations.add(lc);
                 LatLng pos = new LatLng(lat, lng);
                 float hue = BitmapDescriptorFactory.HUE_CYAN;
-                if(name.equals("Vault 29"))
-                    Log.i("hi","hi");
                 if(count > 30 && count < 60)
                     hue = BitmapDescriptorFactory.HUE_YELLOW;
                 else if(count > 60 && count < 90){
@@ -177,6 +175,7 @@ public class MapActivity extends FragmentActivity
                     hue = BitmapDescriptorFactory.HUE_RED;
 
                 if(locationMarkers.containsKey(key)) {
+                    Marker marker = locationMarkers.get(key);
                     marker.setPosition(pos);
                     marker.setIcon(BitmapDescriptorFactory.defaultMarker(hue));
                 } else {
@@ -193,7 +192,31 @@ public class MapActivity extends FragmentActivity
 
             @Override
             public void onChildChanged(DataSnapshot snapshot, String str){
+                String key = (String) snapshot.getKey();
+                String name = (String) snapshot.child("name").getValue();
+                double lat = (double) snapshot.child("lat").getValue();
+                double lng = (double) snapshot.child("lng").getValue();
+                long count = (long) snapshot.child("count").getValue();
 
+                LocationData lc = new LocationData(name, lat, lng, count);
+                fbLocations.add(lc);
+                LatLng pos = new LatLng(lat, lng);
+                float hue = BitmapDescriptorFactory.HUE_CYAN;
+                if(count > 30 && count < 60)
+                    hue = BitmapDescriptorFactory.HUE_YELLOW;
+                else if(count > 60 && count < 90){
+                    hue = BitmapDescriptorFactory.HUE_ORANGE;
+                } else if(count >= 90)
+                    hue = BitmapDescriptorFactory.HUE_RED;
+
+                if(locationMarkers.containsKey(key)) {
+                    Boolean shown = yourMarker.isInfoWindowShown();
+                    Marker marker = locationMarkers.get(key);
+                    marker.setIcon(BitmapDescriptorFactory.defaultMarker(hue));
+                    marker.setSnippet("People: " + count);
+                    if(shown)
+                        marker.showInfoWindow();
+                }
             }
 
             @Override
